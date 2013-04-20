@@ -12,8 +12,10 @@ namespace mpMap
 	{
 		qreal factor = 1.2;
 		if (event->delta() < 0) factor = 1.0 / factor;
-		QPointF centre = this->mapToScene(event->pos());
+		QPointF currentCentre = mapToScene(viewport()->rect()).boundingRect().center();
+		QPointF pointBeforeScale = this->mapToScene(event->pos());
 		scale(factor, factor);
-		this->centerOn(centre);
+		QPointF pointAfterScale = this->mapToScene(event->pos());
+		this->centerOn(currentCentre + (pointBeforeScale - pointAfterScale));
 	}
 }
