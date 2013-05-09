@@ -1,3 +1,6 @@
 #include <QColor>
 #include <QVector>
-void constructColourTable(int n, QVector<QRgb>& vector);
+namespace mpMap
+{
+	void constructColourTable(int n, QVector<QRgb>& vector);
+}

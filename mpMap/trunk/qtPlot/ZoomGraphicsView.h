@@ -8,7 +8,7 @@ namespace mpMap
 	public:
 		ZoomGraphicsView(QGraphicsScene* scene);
 	protected:
-		void ZoomGraphicsView::wheelEvent(QWheelEvent* event);
+		void wheelEvent(QWheelEvent* event);
 	};
 }
 #endif

@@ -3,5 +3,5 @@ struct SEXPREC;
 typedef SEXPREC* SEXP;
 extern "C"
 {
-	Q_DECL_EXPORT SEXP plotQTImpl(SEXP data, SEXP groups);
+	Q_DECL_EXPORT SEXP plotQTImpl(SEXP data, SEXP imputedData, SEXP groups, SEXP auxillaryNumeric);
 }

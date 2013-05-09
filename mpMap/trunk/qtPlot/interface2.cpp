@@ -3,14 +3,14 @@
 #include <QApplication>
 namespace mpMap
 {
-	void plotQTImpl2(double* data, int* originalGroups_, int nMarkers, const std::vector<std::string>& markerNames, std::vector<std::string>& outputMarkerNames, std::vector<int>& outputGroups)
+	void plotQTImpl2(double* data, double* imputedData, int* originalGroups_, int nMarkers, const std::vector<std::string>& markerNames, std::vector<std::string>& outputMarkerNames, std::vector<int>& outputGroups, double* auxData, int auxRows)
 	{
 		char* argv[] = {""};
 		int argc = 0;
 		QApplication app(argc, argv);
 		
 		std::vector<int> originalGroups(originalGroups_, originalGroups_+nMarkers);
-		mpMap::qtPlot plot(data, originalGroups, nMarkers, markerNames);
+		mpMap::qtPlot plot(data, imputedData, originalGroups, markerNames, auxData, auxRows);
 		plot.show();
 		app.exec();
 		const qtPlotData& outputData = plot.getData();
