@@ -3,5 +3,6 @@ struct SEXPREC;
 typedef SEXPREC* SEXP;
 extern "C"
 {
+	Q_DECL_EXPORT SEXP registerQtPluginDir(SEXP path);
 	Q_DECL_EXPORT SEXP plotQTImpl(SEXP data, SEXP imputedData, SEXP groups, SEXP auxillaryNumeric);
 }
