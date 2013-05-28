@@ -15,6 +15,8 @@
 #include <QStandardItemModel>
 #include <QApplication>
 #include "order.h"
+#include <stdexcept>
+#include <cmath>
 namespace mpMap
 {
 	int qtPlotData::getMarkerCount() const
@@ -55,11 +57,11 @@ namespace mpMap
 		return currentMarkerNames;
 	}
 	qtPlotData::qtPlotData(const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames)
-		:originalGroups(originalGroups), originalMarkerNames(originalMarkerNames), currentMarkerNames(originalMarkerNames)
+		:originalMarkerNames(originalMarkerNames), currentMarkerNames(originalMarkerNames),originalGroups(originalGroups)
 	{
 		if(originalGroups.size() != originalMarkerNames.size()) throw std::runtime_error("Internal error");
 		//set up identity permutation initially
-		for(int i = 0; i < originalGroups.size(); i++) identity.push_back(i);
+		for(std::size_t i = 0; i < originalGroups.size(); i++) identity.push_back(i);
 	}
 	const std::vector<int>& qtPlotData::getCurrentPermutation() const
 	{
@@ -79,7 +81,7 @@ namespace mpMap
 			const std::vector<int>& currentCumulativePermutation = getCurrentPermutation();
 			currentMarkerNames.clear();
 			currentMarkerNames.resize(currentCumulativePermutation.size());
-			for(int i = 0; i < currentCumulativePermutation.size(); i++)
+			for(std::size_t i = 0; i < currentCumulativePermutation.size(); i++)
 			{
 				currentMarkerNames[i] = originalMarkerNames[currentCumulativePermutation[i]];
 			}
@@ -93,7 +95,7 @@ namespace mpMap
 
 		currentMarkerNames.resize(permutation.size());
 
-		for(int i = 0; i < permutation.size(); i++)
+		for(std::size_t i = 0; i < permutation.size(); i++)
 		{
 			newCumulativePermutation[i] = currentCumulativePermutation[permutation[i]];
 			currentMarkerNames[i] = originalMarkerNames[newCumulativePermutation[i]];
@@ -290,8 +292,7 @@ namespace mpMap
 		graphicsView->setSceneRect(bounding);
 	}
 	qtPlot::qtPlot(double* rawImageData, double* imputedRawImageData, const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames, double* auxData, int auxRows)
-		:rawImageData(rawImageData), data(new qtPlotData(originalGroups, originalMarkerNames)), isFullScreen(false), horizontalGroup(-1), verticalGroup(-1), pixmapItem(NULL), horizontalHighlight(NULL), verticalHighlight(NULL), currentMode(Groups), startIntervalPos(-1), 
-		intervalHighlight(NULL), highlightColour("blue"), imputedRawImageData(imputedRawImageData), computationMutex(QMutex::NonRecursive), singleModePos(-1), nOriginalMarkers((int)originalGroups.size()), singleHighlight(NULL), auxData(auxData), auxRows(auxRows)
+		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(imputedRawImageData), isFullScreen(false), pixmapItem(NULL), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive)
 	{
 		highlightColour.setAlphaF(0.3);
 		int nMarkers = (int)originalGroups.size();
@@ -334,30 +335,23 @@ namespace mpMap
 	void qtPlot::group2ReturnPressed()
 	{
 		int group1, group2;
-		try
-		{
-			group1 = std::stoi(group1Edit->text().toStdString());
-			const std::vector<int>& currentGroups = data->getCurrentGroups();
-			if(std::find(currentGroups.begin(), currentGroups.end(), group1) == currentGroups.end())
-			{
-				return;
-			}
-			group2 = std::stoi(group2Edit->text().toStdString());
-			if(std::find(currentGroups.begin(), currentGroups.end(), group2) == currentGroups.end())
-			{
-				return;
-			}
-			int start1 = data->startOfGroup(group1);
-			int end1 = data->endOfGroup(group1);
-			int start2 = data->startOfGroup(group2);
-			int end2 = data->endOfGroup(group2);
-			graphicsView->fitInView(start2,start1,end2-start2,end1-start1,Qt::KeepAspectRatio);
-			signalMouseMove();
-		}
-		catch(...)
+		group1 = std::atoi(group1Edit->text().toStdString().c_str());
+		const std::vector<int>& currentGroups = data->getCurrentGroups();
+		if(std::find(currentGroups.begin(), currentGroups.end(), group1) == currentGroups.end())
 		{
 			return;
 		}
+		group2 = std::atoi(group2Edit->text().toStdString().c_str());
+		if(std::find(currentGroups.begin(), currentGroups.end(), group2) == currentGroups.end())
+		{
+			return;
+		}
+		int start1 = data->startOfGroup(group1);
+		int end1 = data->endOfGroup(group1);
+		int start2 = data->startOfGroup(group2);
+		int end2 = data->endOfGroup(group2);
+		graphicsView->fitInView(start2,start1,end2-start2,end1-start1,Qt::KeepAspectRatio);
+		signalMouseMove();
 	}
 	void qtPlot::signalMouseMove()
 	{
@@ -366,20 +360,14 @@ namespace mpMap
 	}
 	void qtPlot::group1ReturnPressed()
 	{
-		try
+		int group = std::atoi(group1Edit->text().toStdString().c_str());
+		const std::vector<int>& currentGroups = data->getCurrentGroups();
+		if(std::find(currentGroups.begin(), currentGroups.end(), group) != currentGroups.end())
 		{
-			int group = std::stoi(group1Edit->text().toStdString());
-			const std::vector<int>& currentGroups = data->getCurrentGroups();
-			if(std::find(currentGroups.begin(), currentGroups.end(), group) != currentGroups.end())
-			{
-				int start = data->startOfGroup(group);
-				int end = data->endOfGroup(group);
-				graphicsView->fitInView(start,start,end-start,end-start,Qt::KeepAspectRatioByExpanding);
-				signalMouseMove();
-			}
-		}
-		catch(...)
-		{
+			int start = data->startOfGroup(group);
+			int end = data->endOfGroup(group);
+			graphicsView->fitInView(start,start,end-start,end-start,Qt::KeepAspectRatioByExpanding);
+			signalMouseMove();
 		}
 	}
 	const qtPlotData& qtPlot::getData()

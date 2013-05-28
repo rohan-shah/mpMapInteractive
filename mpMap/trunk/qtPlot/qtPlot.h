@@ -12,8 +12,8 @@ namespace mpMap
 	struct qtPlotData
 	{
 		qtPlotData(const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames);
-		int qtPlotData::startOfGroup(int group);
-		int qtPlotData::endOfGroup(int group);
+		int startOfGroup(int group);
+		int endOfGroup(int group);
 		const std::vector<int>& getCurrentPermutation() const;
 		const std::vector<int>& getCurrentGroups() const;
 		void applyPermutation(const std::vector<int>& permutation, const std::vector<int>& newGroups);

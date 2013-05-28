@@ -2,6 +2,7 @@
 #include <map>
 #include <algorithm>
 #include <string>
+#include <stdexcept>
 #include <R.h>
 #include <Rdefines.h>
 namespace mpMap
