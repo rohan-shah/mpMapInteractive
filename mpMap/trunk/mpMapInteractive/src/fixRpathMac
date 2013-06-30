@@ -1,0 +1,30 @@
+cp libqtPlot.1.0.0.dylib qtPlot.so
+#Fix qtPlot.so dependencies
+install_name_tool -change QtWidgets @loader_path/QtWidgets qtPlot.so
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtGui.framework/Versions/5/QtGui @loader_path/QtGui qtPlot.so
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtCore.framework/Versions/5/QtCore @loader_path/QtCore qtPlot.so
+
+cp ~/Qt5.0.2/5.0.2/clang_64/lib/QtCore.framework/Versions/5/QtCore ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/
+cp ~/Qt5.0.2/5.0.2/clang_64/lib/QtGui.framework/Versions/5/QtGui ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/
+cp ~/Qt5.0.2/5.0.2/clang_64/lib/QtWidgets.framework/Versions/5/QtWidgets ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/
+cp ~/Qt5.0.2/5.0.2/clang_64/lib/QtPrintSupport.framework/Versions/5/QtPrintSupport ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/
+#mkdir ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms
+cp ~/Qt5.0.2/5.0.2/clang_64/plugins/platforms/libqcocoa.dylib ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms
+cp qtPlot.so ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/
+
+#fix qt library dependencies
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtWidgets
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtGui.framework/Versions/5/QtGui @loader_path/QtGui ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtWidgets
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtGui
+
+#fix qtPrintSupport
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtCore.framework/Versions/5/QtCore @loader_path/QtCore ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtPrintSupport
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtGui.framework/Versions/5/QtGui @loader_path/QtGui ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtPrintSupport
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtWidgets.framework/Versions/5/QtWidgets @loader_path/QtWidgets ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/QtPrintSupport
+
+/Users/rohan/mpMap/mpMap/trunk/qtPlot/qtPlot.cpp
+#fix libqcocoa dependencies
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtCore.framework/Versions/5/QtCore @loader_path/../QtCore ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms/libqcocoa.dylib
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtGui.framework/Versions/5/QtGui @loader_path/../QtGui ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms/libqcocoa.dylib
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtWidgets.framework/Versions/5/QtWidgets @loader_path/../QtWidgets ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms/libqcocoa.dylib
+install_name_tool -change /Users/bld.qt/bamboo-agent-home/xml-data/build-dir/DQTC-RELBUILD502LGPL-OSX106/______________________________PADDING______________________________/lib/QtPrintSupport.framework/Versions/5/QtPrintSupport @loader_path/../QtPrintSupport ~/mpMap/mpMap/trunk/mpMap/inst/libs/x86_64/platforms/libqcocoa.dylib

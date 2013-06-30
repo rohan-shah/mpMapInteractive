@@ -1,0 +1,11 @@
+Package: mpMapInteractive
+Type: Package
+Title: Interactive components for package mpMap
+Version: 0.1
+Date: 2013-06-30
+Author: Rohan Shah
+Maintainer: Rohan Shah <cran@bookshah.com>
+Description: This package provides interactive plotting functions for the mpMap package
+License: GPL v3
+Collate:
+    'onLoad.R'
