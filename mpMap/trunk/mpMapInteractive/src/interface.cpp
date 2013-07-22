@@ -64,6 +64,7 @@ extern "C"
 	//here we need to pass in the directory in which this shared library is located. In the case of dynamic linkage to QT, we need to register this path so that QT can find the plugins directory
 	Q_DECL_EXPORT SEXP loadQT()
 	{
+		QCoreApplication::addLibraryPath(QString("."));
 		//only needs to be called once
 		static bool called = false;
 		if(called) return R_NilValue;
