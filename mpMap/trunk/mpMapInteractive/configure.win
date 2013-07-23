@@ -5,10 +5,11 @@
 #		Note that I'm not using mingw / gcc / g++ (the standard compiler for R extensions) for this binary chunk because 1) The binary QT MinGW download is 32-bit only and 2) The version of gcc / g++ packaged with Rtools may not be compatible with that used to build QT, I think Rtools tends to package a very specific (and potentially older) version. I suppose you could use the Rtools compiler to build your own QT version from source, but that's not a good solution, better to use as much precompiled stuff as possible. 
 #
 # Instructions for using:
-#1. Open up a Visual Studio 2012 x64 Cross Tools Command Prompt (start menu shortcut)
-#2. In the command promput, set the environment variable QT_DIRECTORY to the directory you extracted QT to (I run the command "set QT_DIRECTORY=C:/QtBinary/Qt5.0.2/5.0.2/msvc2012_64/")
-#3. Change directory to the mpMapInteractive package root.
-#4. Run R CMD INSTALL --no-test-load 
+#1. Make sure the PATH points to 64-bit R (check by running "R" on a command prompt and seeing whether it's 32 or 64 bit)
+#2. Open up a Visual Studio 2012 x64 Cross Tools Command Prompt (start menu shortcut)
+#3. In the command promput, set the environment variable QT_DIRECTORY to the directory you extracted QT to (I run the command "set QT_DIRECTORY=C:/QtBinary/Qt5.0.2/5.0.2/msvc2012_64/")
+#4. Change directory to the mpMapInteractive package root.
+#5. Run R CMD INSTALL --no-test-load 
 #
 #
 # NOTE: Using configure.win means that only the 64-bit package version will be built. This is not really a problem, but would be confusing to distribute on CRAN, as people will expect both versions to be built by default. 
