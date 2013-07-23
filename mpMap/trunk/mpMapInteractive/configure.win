@@ -48,14 +48,14 @@ else
 	lib /machine:IX86 /nodefaultlib /def:R.def
 fi
 
-mode=debug
+mode=release
 
 mkdir -p "${R_PACKAGE_DIR}/libs/${R_ARCH}/platforms"
 mkdir -p "${R_PACKAGE_DIR}/libs/${R_ARCH}"
 cp ${QT_DIRECTORY}/bin/d3dcompiler* "${R_PACKAGE_DIR}/libs/${R_ARCH}"
-cp "${QT_DIRECTORY}/bin/icudt49.dll" "${R_PACKAGE_DIR}/libs/${R_ARCH}"
-cp "${QT_DIRECTORY}/bin/icuuc49.dll" "${R_PACKAGE_DIR}/libs/${R_ARCH}"
-cp "${QT_DIRECTORY}/bin/icuin49.dll" "${R_PACKAGE_DIR}/libs/${R_ARCH}"
+cp ${QT_DIRECTORY}/bin/icudt* "${R_PACKAGE_DIR}/libs/${R_ARCH}"
+cp ${QT_DIRECTORY}/bin/icuuc* "${R_PACKAGE_DIR}/libs/${R_ARCH}"
+cp ${QT_DIRECTORY}/bin/icuin* "${R_PACKAGE_DIR}/libs/${R_ARCH}"
 nmake clean
 if [ "$mode" = "release" ]; then
 	nmake Release
