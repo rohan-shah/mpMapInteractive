@@ -47,10 +47,10 @@ extern "C"
 
 		SEXP retVal, R_markerNames, R_outputGroups;
 		PROTECT(retVal = allocVector(VECSXP, 2));
-			PROTECT(R_markerNames = allocVector(STRSXP, outputMarkerNames.size()));
+			PROTECT(R_markerNames = allocVector(STRSXP, (R_len_t)outputMarkerNames.size()));
 				SET_VECTOR_ELT(retVal, 0, R_markerNames);
 			UNPROTECT(1);
-			PROTECT(R_outputGroups = allocVector(INTSXP, outputGroups.size()));
+			PROTECT(R_outputGroups = allocVector(INTSXP, (R_len_t)outputGroups.size()));
 				SET_VECTOR_ELT(retVal, 1, R_outputGroups);
 			UNPROTECT(1);
 			for(int i = 0; i < outputMarkerNames.size(); i++)
@@ -73,5 +73,6 @@ extern "C"
 		//We make an attempt here to tripper the QT runtime, at which point it will load up all the required plugins, while the 
 		//working directory is correctly set. 
 		QApplication app(argc, argv);
+		return R_NilValue;
 	}
 }

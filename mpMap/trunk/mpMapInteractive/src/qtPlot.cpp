@@ -61,7 +61,7 @@ namespace mpMap
 	{
 		if(originalGroups.size() != originalMarkerNames.size()) throw std::runtime_error("Internal error");
 		//set up identity permutation initially
-		for(std::size_t i = 0; i < originalGroups.size(); i++) identity.push_back(i);
+		for(int i = 0; i < (int)originalGroups.size(); i++) identity.push_back(i);
 	}
 	const std::vector<int>& qtPlotData::getCurrentPermutation() const
 	{
@@ -105,12 +105,28 @@ namespace mpMap
 	}
 	qtPlot::~qtPlot()
 	{
+		imageTiles.clear();
 		delete originalDataToChar;
-		if(pixmapItem != NULL) delete pixmapItem;
+		delete horizontalHighlight;
+		delete verticalHighlight;
+		delete intervalHighlight;
+		delete singleHighlight;
+
+		delete graphicsView;
+		delete graphicsScene;
+		delete joinGroupsLabel;
+		delete group1Edit;
+		delete group2Edit;
+		delete groupsModeWidget;
+		delete intervalModeWidget;
+		delete singleModeWidget;
+		delete auxillaryLabel;
+		delete statusLabel;
+		delete statusBar;
 	}
 	void qtPlot::addStatusBar()
 	{
-		QStatusBar* statusBar = new QStatusBar();
+		statusBar = new QStatusBar();
 		statusLabel = new QLabel();
 		statusLabel->setText("");
 		statusBar->addPermanentWidget(statusLabel);
@@ -124,13 +140,6 @@ namespace mpMap
 	}
 	void qtPlot::initialiseImageData(int nMarkers)
 	{
-		//this is the image that contains the current data. As opposed to originalDatToChar, which contains the data IN THE ORIGINAL ORDERING
-		image = QSharedPointer<QImage>(new QImage(nMarkers, nMarkers, QImage::Format_Indexed8));
-		//get 100 colours
-		QVector<QRgb> colours;
-		constructColourTable(nColours, colours);
-		image->setColorTable(colours);
-
 		originalDataToChar = new uchar[nMarkers * nMarkers];
 		//scale data from float to integer
 		for(int i = 0; i < nMarkers; i++)
@@ -292,13 +301,14 @@ namespace mpMap
 		graphicsView->setSceneRect(bounding);
 	}
 	qtPlot::qtPlot(double* rawImageData, double* imputedRawImageData, const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames, double* auxData, int auxRows)
-		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(imputedRawImageData), isFullScreen(false), pixmapItem(NULL), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive)
+		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(imputedRawImageData), isFullScreen(false), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive)
 	{
 		highlightColour.setAlphaF(0.3);
 		int nMarkers = (int)originalGroups.size();
 		initialiseImageData(nMarkers);
 		QHBoxLayout* topLayout = new QHBoxLayout();
 		graphicsScene = new QGraphicsScene();	
+		graphicsScene->setItemIndexMethod(QGraphicsScene::NoIndex);
 		graphicsView = new ZoomGraphicsView(graphicsScene);
 		updateImageFromRaw();
 		graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -380,11 +390,13 @@ namespace mpMap
 		{
 			graphicsScene->removeItem(static_cast<QGraphicsItem*>(horizontalHighlight));
 			delete horizontalHighlight;
+			horizontalHighlight = NULL;
 		}
 		if(verticalGroup != -1)
 		{
 			graphicsScene->removeItem(static_cast<QGraphicsItem*>(verticalHighlight));
 			delete verticalHighlight;
+			verticalHighlight = NULL;
 		}
 		horizontalGroup = -1;
 		verticalGroup = -1;
@@ -414,11 +426,13 @@ namespace mpMap
 		{
 			graphicsScene->removeItem(static_cast<QGraphicsItem*>(horizontalHighlight));
 			delete horizontalHighlight;
+			horizontalHighlight = NULL;
 		}
 		if(verticalGroup != -1)
 		{
 			graphicsScene->removeItem(static_cast<QGraphicsItem*>(verticalHighlight));
 			delete verticalHighlight;
+			verticalHighlight = NULL;
 		}
 
 		int firstHorizontalIndex = data->startOfGroup(newHorizontalGroup);
@@ -450,7 +464,7 @@ namespace mpMap
 		}
 		startIntervalPos = start;
 		endIntervalPos = end;
-		intervalHighlight->setZValue(-1);
+		intervalHighlight->setZValue(0);
 	}
 	bool qtPlot::eventFilter(QObject* object, QEvent *event)
 	{
@@ -535,7 +549,7 @@ namespace mpMap
 		{
 			int nMarkers = data->getMarkerCount();
 			singleHighlight = graphicsScene->addRect(pos, 0, 1, nMarkers, QPen(Qt::NoPen), highlightColour);
-			singleHighlight->setZValue(-1);
+			singleHighlight->setZValue(0);
 			singleModePos = pos;
 		}
 	}
@@ -689,12 +703,6 @@ namespace mpMap
 	}
 	void qtPlot::updateImageFromRaw()
 	{
-		if(pixmapItem != NULL) 
-		{
-			graphicsScene->removeItem(pixmapItem);
-			delete pixmapItem;
-			pixmapItem = NULL;
-		}
 		for(std::vector<QGraphicsRectItem*>::iterator i = transparency.begin(); i != transparency.end(); i++)
 		{
 			graphicsScene->removeItem(*i);
@@ -702,9 +710,99 @@ namespace mpMap
 		}
 		transparency.clear();
 		
-		image->fill(QColor("white"));
 		const std::vector<int>& permutation = data->getCurrentPermutation();
+		const std::vector<int>& groups = data->getCurrentGroups();
 		int nMarkers = data->getMarkerCount();
+		
+		std::vector<int> uniqueGroups = groups;
+		//sort
+		std::sort(uniqueGroups.begin(), uniqueGroups.end());
+		//discard duplicates
+		uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
+		
+		int nGroups = uniqueGroups.size();
+		int* startGroups = new int[nGroups];
+		int* endGroups = new int[nGroups];
+		for(int i = 0; i < nGroups; i++)
+		{
+			startGroups[i] = data->startOfGroup(uniqueGroups[i]);
+			endGroups[i] = data->endOfGroup(uniqueGroups[i]);
+		}
+		
+		//Go through the image data and delete any groups that have changed in their row / column member indices
+		for(int rowGroupCounter = 0; rowGroupCounter < nGroups; rowGroupCounter++)
+		{
+			int rowGroup = uniqueGroups[rowGroupCounter];
+			for(int columnGroupCounter = 0; columnGroupCounter < nGroups; columnGroupCounter++)
+			{
+				int columnGroup = uniqueGroups[columnGroupCounter];
+				std::set<imageTile, imageTileComparer>::const_iterator located = imageTile::find(imageTiles, rowGroup, columnGroup);
+				int startOfRowGroup = startGroups[rowGroupCounter], startOfColumnGroup = startGroups[columnGroupCounter];;
+
+				std::vector<int> expectedRowIndices;
+				std::vector<int> expectedColumnIndices;
+				for(int i = 0; i != permutation.size(); i++)
+				{
+					if(groups[i] == rowGroup) expectedRowIndices.push_back(permutation[i]);
+					if(groups[i] == columnGroup) expectedColumnIndices.push_back(permutation[i]);
+				}
+
+				if(located != imageTiles.end())
+				{
+					if(!located->checkIndices(expectedRowIndices, expectedColumnIndices))
+					{
+						graphicsScene->removeItem(located->getItem());
+						imageTiles.erase(located);
+					}
+				}
+				//Add in any rows / column that are now missing
+				located = imageTile::find(imageTiles, rowGroup, columnGroup);
+				if(located == imageTiles.end())
+				{
+					imageTile newTile = imageTile(originalDataToChar, nMarkers, rowGroup, columnGroup, expectedRowIndices, expectedColumnIndices, graphicsScene);
+					imageTiles.insert(newTile);
+				}
+				//set position
+				located = imageTile::find(imageTiles, rowGroup, columnGroup);
+				if(located == imageTiles.end())
+				{
+					throw std::runtime_error("Internal error");
+				}
+				QGraphicsPixmapItem* currentItem = located->getItem();
+				currentItem->setPos(startOfRowGroup, startOfColumnGroup);
+			}
+		}
+		//Go through and remove unnecessary groups. Anything that doesn't match here just gets wiped
+		std::set<imageTile>::iterator currentTile = imageTiles.begin();
+		std::vector<int> newColumnIndices, newRowIndices;
+		newRowIndices.reserve(permutation.size()), newColumnIndices.reserve(permutation.size());
+		while(currentTile != imageTiles.end())
+		{
+			newRowIndices.clear();
+			newColumnIndices.clear();
+			int rowGroup = currentTile->getRowGroup(), columnGroup = currentTile->getColumnGroup();
+			//does the group still exist?
+			if(std::find(uniqueGroups.begin(), uniqueGroups.end(), rowGroup) == uniqueGroups.end() || std::find(uniqueGroups.begin(), uniqueGroups.end(), columnGroup) == uniqueGroups.end())
+			{
+				goto delete_tile;
+			}
+			//Are the row and column indices correct?
+			{
+				for(int i = 0; i != permutation.size(); i++)
+				{
+					if(groups[i] == rowGroup) newRowIndices.push_back(permutation[i]);
+					if(groups[i] == columnGroup) newColumnIndices.push_back(permutation[i]);
+				}
+				if(!currentTile->checkIndices(newRowIndices, newColumnIndices)) goto delete_tile;
+			}
+			currentTile++;
+			continue;
+delete_tile:
+			graphicsScene->removeItem(currentTile->getItem());
+			currentTile = imageTiles.erase(currentTile);
+			continue;
+
+		}
 		//Set up image data (accounting for padding
 		/*		
 		#pragma omp parallel for
@@ -716,89 +814,31 @@ namespace mpMap
 				rawData[j] = originalDataToChar[permutation[i] * nMarkers + permutation[j]];
 			}
 		}*/
-		//Actually, a common use-case is that the start and end are (partially) the identity permutation, so do some optimisation for this case
-		int countInitial = -1;
-		do
-		{
-			countInitial++;
-		}
-		while(countInitial < nMarkers && permutation[countInitial] == countInitial);
-		//now countInitial is the first entry in the permutation that's not the identity
-		//we don't do anything if the whole thing is the identity
-		if(countInitial == nMarkers) 
-		{
-			for(int i = 0; i < nMarkers; i++)
-			{
-				uchar* rawData = image->scanLine(i);
-				memcpy(rawData, originalDataToChar, nMarkers);
-			}
-		}
-
-		int indexFinal = nMarkers;
-		do
-		{
-			indexFinal--;
-		}
-		while(indexFinal >= 0 && permutation[indexFinal] == indexFinal + (nOriginalMarkers - nMarkers));
-		//now indexFinal is the first (counting backwards from the end) index which is not the identity
-		for(int i = 0; i < countInitial; i++)
-		{
-			uchar* rawData = image->scanLine(i);
-			memcpy(rawData + 0, &(originalDataToChar[i * nOriginalMarkers + 0]), countInitial);
-			memcpy(rawData + indexFinal + 1, &(originalDataToChar[i * nOriginalMarkers + indexFinal+1 + (nOriginalMarkers - nMarkers)]), nMarkers - indexFinal - 1);
-		}
-		for(int i = nMarkers-1; i > indexFinal; i--)
-		{
-			uchar* rawData = image->scanLine(i);
-			memcpy(rawData + 0, &(originalDataToChar[(i + (nOriginalMarkers - nMarkers)) * nOriginalMarkers + 0]), countInitial);
-			memcpy(rawData + indexFinal + 1, &(originalDataToChar[(i + (nOriginalMarkers - nMarkers)) * nOriginalMarkers + indexFinal+1 + (nOriginalMarkers - nMarkers)]), nMarkers - indexFinal - 1);
-		}
-		#pragma omp parallel for
-		for(int i = 0; i < nMarkers; i++)
-		{
-			uchar* rawData = image->scanLine(i);
-			if(i >= countInitial && i <= indexFinal)
-			{
-				for(int j = 0; j < nMarkers; j++)
-				{
-					rawData[j] = originalDataToChar[permutation[i] * nOriginalMarkers + permutation[j]];
-				}
-			}
-			else
-			{
-				for(int j = countInitial; j <= indexFinal; j++)
-				{
-					rawData[j] = originalDataToChar[permutation[i] * nOriginalMarkers + permutation[j]];
-				}
-			}
-		}
 		//convert to pixmap
-		QPixmap totalPixmap = QPixmap::fromImage(*image);
-		pixmapItem = graphicsScene->addPixmap(totalPixmap);
-		pixmapItem->setZValue(-1);
+		//QPixmap totalPixmap = QPixmap::fromImage(*image);
+		//pixmapItem = graphicsScene->addPixmap(totalPixmap);
+		//pixmapItem->setZValue(0);
 
 		//Add transparency / highlighting of different groups
-		std::vector<int> groups = data->getCurrentGroups();
-		std::vector<int>::iterator newEnd = std::unique(groups.begin(), groups.end());
-		int nGroups = std::distance(groups.begin(), newEnd);
 		QColor whiteColour("white");
 		whiteColour.setAlphaF(0.4);
 		QBrush whiteBrush(whiteColour);
 		for(int i = 0; i < nGroups; i++)
 		{
-			int startGroup1 = data->startOfGroup(groups[i]);
-			int endGroup1 = data->endOfGroup(groups[i]);
+			int startGroup1 = startGroups[i];
+			int endGroup1 = endGroups[i];
 			for(int j = 0; j < nGroups; j++)
 			{
-				int startGroup2 = data->startOfGroup(groups[j]);
-				int endGroup2 = data->endOfGroup(groups[j]);
+				int startGroup2 = startGroups[j];
+				int endGroup2 = endGroups[j];
 				if(i %2 == j %2)
 				{
 					transparency.push_back(graphicsScene->addRect(startGroup1, startGroup2, endGroup1 - startGroup1, endGroup2 - startGroup2, QPen(Qt::NoPen), whiteBrush));
 				}
 			}
 		}
-
+		delete[] startGroups;
+		delete[] endGroups;
 		setBoundingBox(nMarkers);
 		//signal redraw
 		graphicsScene->update();
@@ -847,6 +887,7 @@ namespace mpMap
 				if(0 <= x && x < nMarkers && 0 <= y && y < nMarkers && attemptBeginComputation())
 				{
 					joinGroups(x, y);
+					renewGroupsHighlighting(x, y);
 					endComputation();
 				}
 			}

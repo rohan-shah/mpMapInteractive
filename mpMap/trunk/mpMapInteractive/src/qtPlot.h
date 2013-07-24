@@ -6,9 +6,11 @@
 #include <QLineEdit>
 #include <vector>
 #include <QMutex>
+#include <set>
+#include "imageTileComparer.h"
+#include "imageTile.h"
 namespace mpMap
 {
-
 	struct qtPlotData
 	{
 		qtPlotData(const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames);
@@ -37,7 +39,6 @@ namespace mpMap
 	{
 		Groups, Interval, Single
 	};
-	void reorderImage(uchar* original, uchar* output, int nMarkers);
 	class qtPlot : public QMainWindow
 	{
 		Q_OBJECT
@@ -78,7 +79,6 @@ namespace mpMap
 
 		void initialiseImageData(int nMarkers);
 		void addStatusBar();
-		QSharedPointer<QImage> image;
 		void joinGroups(int x, int y);
 		void undo();
 		void updateImageFromRaw();
@@ -100,7 +100,7 @@ namespace mpMap
 		ZoomGraphicsView* graphicsView;
 		QLabel* statusLabel;
 		QGraphicsScene* graphicsScene;
-		QGraphicsPixmapItem* pixmapItem;
+		std::set<imageTile, imageTileComparer> imageTiles;
 		uchar* originalDataToChar;
 		QLabel* joinGroupsLabel;
 		QLineEdit* group1Edit;
@@ -108,11 +108,11 @@ namespace mpMap
 		QFrame* groupsModeWidget;
 		QFrame* intervalModeWidget;
 		QFrame* singleModeWidget;
-		static const int nColours = 100;
 		QColor highlightColour;
 		std::vector<QGraphicsRectItem*> transparency;
 		int startIntervalPos, endIntervalPos;
 		int singleModePos;
+		QStatusBar* statusBar;
 
 		//related to auxillary numeric data to be shown in status bar
 		double* auxData;
