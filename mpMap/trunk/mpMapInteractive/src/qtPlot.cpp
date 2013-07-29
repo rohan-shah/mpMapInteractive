@@ -14,6 +14,8 @@
 #include <QComboBox>
 #include <QStandardItemModel>
 #include <QApplication>
+#include <QMessageBox>
+#include <QProgressBar>
 #include "order.h"
 #include <stdexcept>
 #include <cmath>
@@ -106,17 +108,20 @@ namespace mpMap
 	qtPlot::~qtPlot()
 	{
 		imageTiles.clear();
+		delete[] imputedRawImageData;
 		delete originalDataToChar;
 		delete horizontalHighlight;
 		delete verticalHighlight;
 		delete intervalHighlight;
 		delete singleHighlight;
+		delete transparency;
 
 		delete graphicsView;
 		delete graphicsScene;
 		delete joinGroupsLabel;
 		delete group1Edit;
 		delete group2Edit;
+		delete orderAllExcept;
 		delete groupsModeWidget;
 		delete intervalModeWidget;
 		delete singleModeWidget;
@@ -215,6 +220,15 @@ namespace mpMap
 		gotoLabel->setPalette(p);
 		formLayout->addRow(gotoLabel, gotoLayout);
 		groupsModeWidget->setLayout(formLayout);
+
+		QLabel* orderLabel = new QLabel("Order all groups except (Ctrl + O)");
+		orderLabel->setEnabled(true);
+		orderLabel->setPalette(p);
+
+		orderAllExcept = new QLineEdit;
+		QRegExp intList(QString("(\\d+\\s*)*"));
+		orderAllExcept->setValidator(new QRegExpValidator(intList));
+		formLayout->addRow(orderLabel, orderAllExcept);
 		return groupsModeWidget;
 	}
 	QFrame* qtPlot::createMode()
@@ -222,7 +236,7 @@ namespace mpMap
 		QFrame* comboContainer = new QFrame;
 		QComboBox* comboMode = new QComboBox;
 		comboMode->addItem("Groups");
-		if(data->singleGroup() && imputedRawImageData != NULL)
+		if(data->singleGroup())
 		{
 			comboMode->addItem("Single marker");
 			comboMode->addItem("Interval");
@@ -300,15 +314,24 @@ namespace mpMap
 		bounding.setHeight(nMarkers + nMarkers/10.0);
 		graphicsView->setSceneRect(bounding);
 	}
-	qtPlot::qtPlot(double* rawImageData, double* imputedRawImageData, const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames, double* auxData, int auxRows)
-		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(imputedRawImageData), isFullScreen(false), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive)
+	qtPlot::qtPlot(double* rawImageData, const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames, double* auxData, int auxRows)
+		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(NULL), isFullScreen(false), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive), transparency(NULL), orderAllExcept(NULL)
 	{
+		imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
 		highlightColour.setAlphaF(0.3);
 		int nMarkers = (int)originalGroups.size();
 		initialiseImageData(nMarkers);
 		QHBoxLayout* topLayout = new QHBoxLayout();
 		graphicsScene = new QGraphicsScene();	
 		graphicsScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+		
+		//Add transparency quad
+		QColor whiteColour("white");
+		whiteColour.setAlphaF(0.4);
+		QBrush whiteBrush(whiteColour);
+		transparency = graphicsScene->addRect(0, 0, nMarkers, nMarkers, QPen(Qt::NoPen), whiteBrush);
+		transparency->setZValue(0);
+		
 		graphicsView = new ZoomGraphicsView(graphicsScene);
 		updateImageFromRaw();
 		graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -444,6 +467,8 @@ namespace mpMap
 		int nMarkers = data->getMarkerCount();
 		horizontalHighlight = graphicsScene->addRect(0, firstHorizontalIndex, nMarkers, lastHorizontalIndex - firstHorizontalIndex, QPen(Qt::NoPen), highlightColour);
 		verticalHighlight = graphicsScene->addRect(firstVerticalIndex, 0, lastVerticalIndex - firstVerticalIndex, nMarkers, QPen(Qt::NoPen), highlightColour);
+		verticalHighlight->setZValue(2);
+		horizontalHighlight->setZValue(2);
 		
 		horizontalGroup = newHorizontalGroup;
 		verticalGroup = newVerticalGroup;
@@ -464,7 +489,7 @@ namespace mpMap
 		}
 		startIntervalPos = start;
 		endIntervalPos = end;
-		intervalHighlight->setZValue(0);
+		intervalHighlight->setZValue(2);
 	}
 	bool qtPlot::eventFilter(QObject* object, QEvent *event)
 	{
@@ -549,7 +574,7 @@ namespace mpMap
 		{
 			int nMarkers = data->getMarkerCount();
 			singleHighlight = graphicsScene->addRect(pos, 0, 1, nMarkers, QPen(Qt::NoPen), highlightColour);
-			singleHighlight->setZValue(0);
+			singleHighlight->setZValue(2);
 			singleModePos = pos;
 		}
 	}
@@ -703,13 +728,7 @@ namespace mpMap
 	}
 	void qtPlot::updateImageFromRaw()
 	{
-		for(std::vector<QGraphicsRectItem*>::iterator i = transparency.begin(); i != transparency.end(); i++)
-		{
-			graphicsScene->removeItem(*i);
-			delete *i;
-		}
-		transparency.clear();
-		
+	
 		const std::vector<int>& permutation = data->getCurrentPermutation();
 		const std::vector<int>& groups = data->getCurrentGroups();
 		int nMarkers = data->getMarkerCount();
@@ -720,13 +739,24 @@ namespace mpMap
 		//discard duplicates
 		uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
 		
+		//pre-cache some data, so it doesn't need to be recomputed in a deeply nested loop
 		int nGroups = uniqueGroups.size();
 		int* startGroups = new int[nGroups];
 		int* endGroups = new int[nGroups];
+		std::vector<std::vector<int> > expectedIndices;
+		expectedIndices.resize(nGroups);
 		for(int i = 0; i < nGroups; i++)
 		{
-			startGroups[i] = data->startOfGroup(uniqueGroups[i]);
-			endGroups[i] = data->endOfGroup(uniqueGroups[i]);
+			int currentGroup = uniqueGroups[i];
+			startGroups[i] = data->startOfGroup(currentGroup);
+			endGroups[i] = data->endOfGroup(currentGroup);
+
+			std::vector<int>& currentGroupIndices = expectedIndices[i];
+			currentGroupIndices.reserve(permutation.size());
+			for(int j = 0; j != permutation.size(); j++)
+			{
+				if(groups[j] == currentGroup) currentGroupIndices.push_back(permutation[j]);
+			}
 		}
 		
 		//Go through the image data and delete any groups that have changed in their row / column member indices
@@ -739,13 +769,13 @@ namespace mpMap
 				std::set<imageTile, imageTileComparer>::const_iterator located = imageTile::find(imageTiles, rowGroup, columnGroup);
 				int startOfRowGroup = startGroups[rowGroupCounter], startOfColumnGroup = startGroups[columnGroupCounter];;
 
-				std::vector<int> expectedRowIndices;
-				std::vector<int> expectedColumnIndices;
-				for(int i = 0; i != permutation.size(); i++)
+				/*for(int i = 0; i != permutation.size(); i++)
 				{
 					if(groups[i] == rowGroup) expectedRowIndices.push_back(permutation[i]);
 					if(groups[i] == columnGroup) expectedColumnIndices.push_back(permutation[i]);
-				}
+				}*/
+				std::vector<int>& expectedRowIndices = expectedIndices[rowGroupCounter];
+				std::vector<int>& expectedColumnIndices = expectedIndices[columnGroupCounter];
 
 				if(located != imageTiles.end())
 				{
@@ -774,26 +804,37 @@ namespace mpMap
 		}
 		//Go through and remove unnecessary groups. Anything that doesn't match here just gets wiped
 		std::set<imageTile>::iterator currentTile = imageTiles.begin();
-		std::vector<int> newColumnIndices, newRowIndices;
-		newRowIndices.reserve(permutation.size()), newColumnIndices.reserve(permutation.size());
 		while(currentTile != imageTiles.end())
 		{
-			newRowIndices.clear();
-			newColumnIndices.clear();
 			int rowGroup = currentTile->getRowGroup(), columnGroup = currentTile->getColumnGroup();
+			std::vector<int>::iterator findRowGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), rowGroup);
+			std::vector<int>::iterator findColumnGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), columnGroup);
 			//does the group still exist?
-			if(std::find(uniqueGroups.begin(), uniqueGroups.end(), rowGroup) == uniqueGroups.end() || std::find(uniqueGroups.begin(), uniqueGroups.end(), columnGroup) == uniqueGroups.end())
+			if(findRowGroup == uniqueGroups.end() || findColumnGroup == uniqueGroups.end())
 			{
 				goto delete_tile;
 			}
+			int rowGroupIndexInAll = std::distance(uniqueGroups.begin(), findRowGroup);
+			int columnGroupIndexInAll = std::distance(uniqueGroups.begin(), findColumnGroup);
+			std::vector<int>& expectedRowIndices = expectedIndices[rowGroupIndexInAll];
+			std::vector<int>& expectedColumnIndices = expectedIndices[columnGroupIndexInAll];
 			//Are the row and column indices correct?
-			{
+			/*{
 				for(int i = 0; i != permutation.size(); i++)
 				{
 					if(groups[i] == rowGroup) newRowIndices.push_back(permutation[i]);
 					if(groups[i] == columnGroup) newColumnIndices.push_back(permutation[i]);
-				}
-				if(!currentTile->checkIndices(newRowIndices, newColumnIndices)) goto delete_tile;
+				}*/
+				if(!currentTile->checkIndices(expectedRowIndices, expectedColumnIndices)) goto delete_tile;
+			//}
+			QGraphicsPixmapItem* pixMapItem = currentTile->getItem();
+			if(rowGroupIndexInAll %2 == columnGroupIndexInAll %2)
+			{
+				pixMapItem->setZValue(1);
+			}
+			else
+			{
+				pixMapItem->setZValue(-1);
 			}
 			currentTile++;
 			continue;
@@ -820,7 +861,7 @@ delete_tile:
 		//pixmapItem->setZValue(0);
 
 		//Add transparency / highlighting of different groups
-		QColor whiteColour("white");
+		/*QColor whiteColour("white");
 		whiteColour.setAlphaF(0.4);
 		QBrush whiteBrush(whiteColour);
 		for(int i = 0; i < nGroups; i++)
@@ -836,7 +877,7 @@ delete_tile:
 					transparency.push_back(graphicsScene->addRect(startGroup1, startGroup2, endGroup1 - startGroup1, endGroup2 - startGroup2, QPen(Qt::NoPen), whiteBrush));
 				}
 			}
-		}
+		}*/
 		delete[] startGroups;
 		delete[] endGroups;
 		setBoundingBox(nMarkers);
@@ -879,6 +920,93 @@ delete_tile:
 					return;
 				}
 			}
+			if(event->key() == Qt::Key_O && (event->modifiers() & Qt::ControlModifier) && imputedRawImageData != NULL)
+			{
+					if(attemptBeginComputation())
+					{
+						QMessageBox confirm;
+						confirm.setText("This could take a while. Continue?");
+						confirm.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+						confirm.setDefaultButton(QMessageBox::No);
+						int ret = confirm.exec();
+						if(ret == QMessageBox::Yes)
+						{
+							//do the imputation again - If groups have been joined then we could end up with NAs in the recombination fraction matrix. Remember that the imputation only removes NAs between markers IN THE SAME GROUP, using the group structure as currently set. We need to assign a group to EVERY marker that was ORIGINALLY here. So everything that has been deleted, and therefore doesn't have a group, goes in (max(group) + 1). 
+							memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
+							//a vector of linkage groups, which assigns a group to EVERY MARKER ORIGINALLY PRESENT
+							const std::vector<int>& oldGroups = data->getCurrentGroups();
+							int additionalGroupNumber = *std::max_element(oldGroups.begin(), oldGroups.end()) + 1;
+							std::vector<int> newGroups(nOriginalMarkers, additionalGroupNumber);
+							const std::vector<int>& currentPermutation = data->getCurrentPermutation();
+							for(int i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
+							std::string error;
+							error.resize(200);
+							bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);
+							if(!ok) throw std::runtime_error("Imputation failed!");
+							
+							std::vector<int> uniqueGroups = data->getCurrentGroups();
+							std::sort(uniqueGroups.begin(), uniqueGroups.end());
+							uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
+							int nGroups = uniqueGroups.size();
+							
+							QRegExp intListRegex(QString("(\\d+)"));
+							QString exceptionsText = orderAllExcept->text();
+							int pos = 0;
+							std::vector<int> exceptionsList;
+							while((pos = intListRegex.indexIn(exceptionsText, pos))!= -1)
+							{
+								bool ok;
+								exceptionsList.push_back(intListRegex.cap(1).toInt(&ok));
+								pos += intListRegex.matchedLength();
+							}
+
+							QProgressBar* progress = new QProgressBar;
+							statusBar->addWidget(progress);
+							progress->setMinimum(0);
+							progress->setMaximum(nGroups - exceptionsList.size());
+							
+							for(int groupCounter = 0; groupCounter < nGroups; groupCounter++)
+							{
+								if(std::find(exceptionsList.begin(), exceptionsList.end(), uniqueGroups[groupCounter]) != exceptionsList.end()) continue;
+								const std::vector<int>& currentPermutation = data->getCurrentPermutation();
+								int startOfGroup = data->startOfGroup(uniqueGroups[groupCounter]);
+								int endOfGroup = data->endOfGroup(uniqueGroups[groupCounter]);
+								int nSubMarkers = endOfGroup - startOfGroup;
+								//The ordering code crashes with only one or two markers. So avoid that case. 
+								if(nSubMarkers >= 3)
+								{
+									//get out the permutation that is going to be applied just to this bit
+									std::vector<int> resultingPermutation;
+									order(imputedRawImageData, nOriginalMarkers, currentPermutation, startOfGroup, endOfGroup, resultingPermutation);
+								
+									//extend this to a permutation that will be applied to the whole matrix
+									std::vector<int> totalResultingPermutation;
+									totalResultingPermutation.resize(nMarkers);
+									//mostly it's the identity, because we're only ordering a small part of the matrix in this step
+									for(int i = 0; i < nMarkers; i++)
+									{
+										totalResultingPermutation[i] = i;
+									}
+									//...but part is not the identity
+									for(int i = 0; i < nSubMarkers; i++)
+									{
+										totalResultingPermutation[i + startOfGroup] = startOfGroup + resultingPermutation[i];
+									}
+									data->applyPermutation(totalResultingPermutation, data->getCurrentGroups());
+								}
+								progress->setValue(groupCounter+1);
+							}
+							statusBar->removeWidget(progress);
+							
+							//copied from applyPermutation
+							updateImageFromRaw();
+							setBoundingBox(data->getMarkerCount());
+
+							delete progress;
+						}
+						endComputation();
+					}
+			}
 			if(event->key() == Qt::Key_J && (event->modifiers() & Qt::ControlModifier))
 			{
 				QSharedPointer<qtPlotData> data = this->data;
@@ -912,14 +1040,18 @@ delete_tile:
 					int start = std::min(this->startIntervalPos, this->endIntervalPos);
 					int end = std::max(this->startIntervalPos, this->endIntervalPos);
 					int nSubMarkers = end + 1 - start;
-					order(imputedRawImageData, nOriginalMarkers, currentPermutation, start, end+1, resultingPermutation);
-					//and the conversion of the submatrix permutation to the bigger matrix
-					std::vector<int> totalPermutation = identityPermutation;
-					for(int i = 0; i < nSubMarkers; i++)
+					//The ordering code crashes with only one or two markers
+					if(nSubMarkers >= 3)
 					{
-						totalPermutation[i + start] = identityPermutation[start + resultingPermutation[i]];
+						order(imputedRawImageData, nOriginalMarkers, currentPermutation, start, end+1, resultingPermutation);
+						//and the conversion of the submatrix permutation to the bigger matrix
+						std::vector<int> totalPermutation = identityPermutation;
+						for(int i = 0; i < nSubMarkers; i++)
+						{
+							totalPermutation[i + start] = identityPermutation[start + resultingPermutation[i]];
+						}
+						applyPermutation(totalPermutation, data->getCurrentGroups());
 					}
-					applyPermutation(totalPermutation, data->getCurrentGroups());
 					endComputation();
 				}
 			}

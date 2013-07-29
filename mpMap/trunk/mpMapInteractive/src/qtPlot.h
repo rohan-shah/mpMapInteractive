@@ -9,6 +9,11 @@
 #include <set>
 #include "imageTileComparer.h"
 #include "imageTile.h"
+//An import from mpMap
+extern "C"
+{
+	bool imputeInternal(double* theta, double* lod, double* lkhd, int nMarkers, int* groups, char* error, int errorLength);
+}
 namespace mpMap
 {
 	struct qtPlotData
@@ -44,7 +49,7 @@ namespace mpMap
 		Q_OBJECT
 	public:
 		~qtPlot();
-		qtPlot(double* rawImageData, double* imputedRawImageData, const std::vector<int>& groups, const std::vector<std::string>& markerNames, double* auxData, int auxRows);
+		qtPlot(double* rawImageData, const std::vector<int>& groups, const std::vector<std::string>& markerNames, double* auxData, int auxRows);
 		const qtPlotData& getData();
 	protected:
 		void closeEvent(QCloseEvent* event);
@@ -109,7 +114,6 @@ namespace mpMap
 		QFrame* intervalModeWidget;
 		QFrame* singleModeWidget;
 		QColor highlightColour;
-		std::vector<QGraphicsRectItem*> transparency;
 		int startIntervalPos, endIntervalPos;
 		int singleModePos;
 		QStatusBar* statusBar;
@@ -126,5 +130,10 @@ namespace mpMap
 		QMutex computationMutex;
 		bool attemptBeginComputation();
 		void endComputation();
+		
+		
+		QGraphicsRectItem* transparency;
+
+		QLineEdit* orderAllExcept;
 	};
 }

@@ -7,18 +7,9 @@
 extern "C"
 {
 	//this is the entry point for R, we want to pull in as little R stuff as possible so it goes in its own file
-	Q_DECL_EXPORT SEXP plotQTImpl(SEXP data, SEXP imputedData, SEXP groups, SEXP auxillaryNumeric)
+	Q_DECL_EXPORT SEXP plotQTImpl(SEXP data, SEXP groups, SEXP auxillaryNumeric)
 	{
 		double* dataPtr = &(REAL(data)[0]);
-
-		//There may or may not be imputed data input to the function (needed for ordering)
-		double* imputedDataPtr;
-		if(TYPEOF(imputedData) != NILSXP)
-		{
-			imputedDataPtr = REAL(imputedData);
-		}
-		else imputedDataPtr = NULL;
-		
 
 		int* groupsPtr = &(INTEGER(groups)[0]);
 		int nMarkers = LENGTH(groups);
@@ -43,7 +34,7 @@ extern "C"
 
 		std::vector<std::string> outputMarkerNames;
 		std::vector<int> outputGroups;
-		mpMap::plotQTImpl2(dataPtr, imputedDataPtr, groupsPtr, nMarkers, markerNames, outputMarkerNames, outputGroups, auxData, auxRows);
+		mpMap::plotQTImpl2(dataPtr, groupsPtr, nMarkers, markerNames, outputMarkerNames, outputGroups, auxData, auxRows);
 
 		SEXP retVal, R_markerNames, R_outputGroups;
 		PROTECT(retVal = allocVector(VECSXP, 2));

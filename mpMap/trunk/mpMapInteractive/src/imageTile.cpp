@@ -24,7 +24,6 @@ namespace mpMap
 		}
 		QPixmap pixMap = QPixmap::fromImage(*image);
 		pixMapItem = QSharedPointer<QGraphicsPixmapItem>(graphicsScene->addPixmap(pixMap));
-		pixMapItem->setZValue(-1);
 		delete image;
 	}
 	imageTile::imageTile()

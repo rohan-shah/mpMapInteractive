@@ -48,6 +48,16 @@ else
 	lib /machine:IX86 /nodefaultlib /def:R.def
 fi
 
+#Generate mpMap.lib
+echo LIBRARY mpMap > mpMap.def
+echo EXPORTS >> mpMap.def
+dumpbin /exports ${R_HOME}/library/mpMap/libs/${R_ARCH}/mpMap.dll | sed -n "s/     ...... .... 0....... \([^ ]*\)/    \1/p" >> mpMap.def
+if [ "${R_ARCH}" = "/x64" ]; then
+	lib /machine:X64 /nodefaultlib /def:mpMap.def
+else
+	lib /machine:IX86 /nodefaultlib /def:mpMap.def
+fi
+
 mode=release
 
 mkdir -p "${R_PACKAGE_DIR}/libs/${R_ARCH}/platforms"
