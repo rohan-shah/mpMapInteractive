@@ -744,7 +744,7 @@ namespace mpMap
 		int* endGroups = new int[nGroups];
 		std::vector<std::vector<int> > expectedIndices;
 		expectedIndices.resize(nGroups);
-		for(int i = 0; i < nGroups; i++)
+		for(size_t i = 0; i < nGroups; i++)
 		{
 			int currentGroup = uniqueGroups[i];
 			startGroups[i] = data->startOfGroup(currentGroup);
@@ -752,14 +752,14 @@ namespace mpMap
 
 			std::vector<int>& currentGroupIndices = expectedIndices[i];
 			currentGroupIndices.reserve(permutation.size());
-			for(int j = 0; j != permutation.size(); j++)
+			for(size_t j = 0; j != permutation.size(); j++)
 			{
 				if(groups[j] == currentGroup) currentGroupIndices.push_back(permutation[j]);
 			}
 		}
 		
 		//Go through the image data and delete any groups that have changed in their row / column member indices
-		for(int rowGroupCounter = 0; rowGroupCounter < nGroups; rowGroupCounter++)
+		for(size_t rowGroupCounter = 0; rowGroupCounter < nGroups; rowGroupCounter++)
 		{
 			int rowGroup = uniqueGroups[rowGroupCounter];
 			for(int columnGroupCounter = 0; columnGroupCounter < nGroups; columnGroupCounter++)
@@ -805,41 +805,47 @@ namespace mpMap
 		std::set<imageTile>::iterator currentTile = imageTiles.begin();
 		while(currentTile != imageTiles.end())
 		{
-			int rowGroup = currentTile->getRowGroup(), columnGroup = currentTile->getColumnGroup();
-			std::vector<int>::iterator findRowGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), rowGroup);
-			std::vector<int>::iterator findColumnGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), columnGroup);
-			//does the group still exist?
-			if(findRowGroup == uniqueGroups.end() || findColumnGroup == uniqueGroups.end())
 			{
-				goto delete_tile;
-			}
-			int rowGroupIndexInAll = std::distance(uniqueGroups.begin(), findRowGroup);
-			int columnGroupIndexInAll = std::distance(uniqueGroups.begin(), findColumnGroup);
-			std::vector<int>& expectedRowIndices = expectedIndices[rowGroupIndexInAll];
-			std::vector<int>& expectedColumnIndices = expectedIndices[columnGroupIndexInAll];
-			//Are the row and column indices correct?
-			/*{
-				for(int i = 0; i != permutation.size(); i++)
+				int rowGroup = currentTile->getRowGroup(), columnGroup = currentTile->getColumnGroup();
+				std::vector<int>::iterator findRowGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), rowGroup);
+				std::vector<int>::iterator findColumnGroup = std::find(uniqueGroups.begin(), uniqueGroups.end(), columnGroup);
+				//does the group still exist?
+				if(findRowGroup == uniqueGroups.end() || findColumnGroup == uniqueGroups.end())
 				{
-					if(groups[i] == rowGroup) newRowIndices.push_back(permutation[i]);
-					if(groups[i] == columnGroup) newColumnIndices.push_back(permutation[i]);
-				}*/
-				if(!currentTile->checkIndices(expectedRowIndices, expectedColumnIndices)) goto delete_tile;
-			//}
-			QGraphicsPixmapItem* pixMapItem = currentTile->getItem();
-			if(rowGroupIndexInAll %2 == columnGroupIndexInAll %2)
-			{
-				pixMapItem->setZValue(1);
+					goto delete_tile;
+				}
+				int rowGroupIndexInAll = std::distance(uniqueGroups.begin(), findRowGroup);
+				int columnGroupIndexInAll = std::distance(uniqueGroups.begin(), findColumnGroup);
+				std::vector<int>& expectedRowIndices = expectedIndices[rowGroupIndexInAll];
+				std::vector<int>& expectedColumnIndices = expectedIndices[columnGroupIndexInAll];
+				//Are the row and column indices correct?
+				/*{
+					for(int i = 0; i != permutation.size(); i++)
+					{
+						if(groups[i] == rowGroup) newRowIndices.push_back(permutation[i]);
+						if(groups[i] == columnGroup) newColumnIndices.push_back(permutation[i]);
+					}*/
+					if(!currentTile->checkIndices(expectedRowIndices, expectedColumnIndices)) goto delete_tile;
+				//}
+				QGraphicsPixmapItem* pixMapItem = currentTile->getItem();
+				if(rowGroupIndexInAll %2 == columnGroupIndexInAll %2)
+				{
+					pixMapItem->setZValue(1);
+				}
+				else
+				{
+					pixMapItem->setZValue(-1);
+				}
+				currentTile++;
+				continue;
 			}
-			else
-			{
-				pixMapItem->setZValue(-1);
-			}
-			currentTile++;
-			continue;
 delete_tile:
 			graphicsScene->removeItem(currentTile->getItem());
-			currentTile = imageTiles.erase(currentTile);
+			std::set<imageTile>::iterator nextTile = currentTile;
+			nextTile++;
+
+			imageTiles.erase(currentTile);
+			currentTile = nextTile;
 			continue;
 
 		}
@@ -904,7 +910,7 @@ delete_tile:
 		int additionalGroupNumber = *std::max_element(oldGroups.begin(), oldGroups.end()) + 1;
 		std::vector<int> newGroups(nOriginalMarkers, additionalGroupNumber);
 		const std::vector<int>& currentPermutation = data->getCurrentPermutation();
-		for(int i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
+		for(size_t i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
 		std::string error;
 		error.resize(200);
 		bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);

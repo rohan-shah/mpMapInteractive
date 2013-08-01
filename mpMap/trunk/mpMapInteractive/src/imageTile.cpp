@@ -6,7 +6,7 @@ namespace mpMap
 	{
 	}
 	imageTile::imageTile(uchar* data, int dataRows, int rowGroup, int columnGroup, const std::vector<int>& rowIndices, const std::vector<int>& columnIndices, QGraphicsScene* graphicsScene)
-	:rowGroup(rowGroup), columnGroup(columnGroup), rowIndices(rowIndices), columnIndices(columnIndices)
+	:rowIndices(rowIndices), columnIndices(columnIndices), rowGroup(rowGroup), columnGroup(columnGroup)
 	{
 		QImage* image = new QImage((int)rowIndices.size(), (int)columnIndices.size(), QImage::Format_Indexed8);
 		//get 100 colours
@@ -14,10 +14,10 @@ namespace mpMap
 		constructColourTable(nColours, colours);
 		image->setColorTable(colours);
 		
-		for(int j = 0; j < columnIndices.size(); j++)
+		for(size_t j = 0; j < columnIndices.size(); j++)
 		{
 			uchar* reorderedData = image->scanLine(j);
-			for(int i = 0; i < rowIndices.size(); i++)
+			for(size_t i = 0; i < rowIndices.size(); i++)
 			{
 				reorderedData[i] = data[columnIndices[j] * dataRows + rowIndices[i]];
 			}
@@ -36,11 +36,11 @@ namespace mpMap
 		{
 				return false;
 		}
-		for(int i = 0; i < otherRowIndices.size(); i++)
+		for(size_t i = 0; i < otherRowIndices.size(); i++)
 		{
 			if(otherRowIndices[i] != rowIndices[i]) return false;
 		}
-		for(int i = 0; i < otherColumnIndices.size(); i++)
+		for(size_t i = 0; i < otherColumnIndices.size(); i++)
 		{
 			if(otherColumnIndices[i] != columnIndices[i]) return false;
 		}

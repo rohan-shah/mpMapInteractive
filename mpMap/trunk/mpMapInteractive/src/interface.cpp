@@ -44,7 +44,7 @@ extern "C"
 			PROTECT(R_outputGroups = allocVector(INTSXP, (R_len_t)outputGroups.size()));
 				SET_VECTOR_ELT(retVal, 1, R_outputGroups);
 			UNPROTECT(1);
-			for(int i = 0; i < outputMarkerNames.size(); i++)
+			for(size_t i = 0; i < outputMarkerNames.size(); i++)
 			{
 				SET_STRING_ELT(R_markerNames, i, mkChar(outputMarkerNames[i].c_str()));
 				INTEGER(R_outputGroups)[i] = outputGroups[i];
@@ -59,11 +59,16 @@ extern "C"
 		//only needs to be called once
 		static bool called = false;
 		if(called) return R_NilValue;
-		char* argv[] = {""};
+
+		char* empty = new char[1];
+		*empty = 0;
+		char* argv[] = {empty};
+
 		int argc = 0;
 		//We make an attempt here to tripper the QT runtime, at which point it will load up all the required plugins, while the 
 		//working directory is correctly set. 
 		QApplication app(argc, argv);
+		delete[] empty;
 		return R_NilValue;
 	}
 }

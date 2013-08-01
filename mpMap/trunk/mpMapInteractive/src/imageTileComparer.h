@@ -5,7 +5,7 @@ namespace mpMap
 	class imageTile;
 	struct imageTileComparer
 	{
-		bool operator()(const imageTile& first, const imageTile& second);
+		bool operator()(const imageTile& first, const imageTile& second) const;
 	};
 }
 #endif

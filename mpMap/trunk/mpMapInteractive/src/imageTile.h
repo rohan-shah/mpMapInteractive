@@ -18,7 +18,7 @@ namespace mpMap
 			int getColumnGroup() const;
 			static std::set<imageTile, imageTileComparer>::const_iterator find(const std::set<imageTile, imageTileComparer>& collection, int rowGroup, int columnGroup);
 			QGraphicsPixmapItem* getItem() const;
-			bool imageTile::checkIndices(const std::vector<int>& otherRowIndices, const std::vector<int>& otherColumnIndices) const;
+			bool checkIndices(const std::vector<int>& otherRowIndices, const std::vector<int>& otherColumnIndices) const;
 		private:
 			imageTile();
 			std::vector<int> rowIndices, columnIndices;
