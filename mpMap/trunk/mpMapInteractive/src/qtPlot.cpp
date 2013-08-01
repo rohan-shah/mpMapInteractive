@@ -317,7 +317,6 @@ namespace mpMap
 	qtPlot::qtPlot(double* rawImageData, const std::vector<int>& originalGroups, const std::vector<std::string>& originalMarkerNames, double* auxData, int auxRows)
 		:currentMode(Groups), horizontalGroup(-1), verticalGroup(-1), horizontalHighlight(NULL), verticalHighlight(NULL), intervalHighlight(NULL), singleHighlight(NULL), data(new qtPlotData(originalGroups, originalMarkerNames)), nOriginalMarkers((int)originalGroups.size()), rawImageData(rawImageData), imputedRawImageData(NULL), isFullScreen(false), highlightColour("blue"), startIntervalPos(-1), singleModePos(-1), auxData(auxData), auxRows(auxRows), computationMutex(QMutex::NonRecursive), transparency(NULL), orderAllExcept(NULL)
 	{
-		imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
 		highlightColour.setAlphaF(0.3);
 		int nMarkers = (int)originalGroups.size();
 		initialiseImageData(nMarkers);
@@ -740,7 +739,7 @@ namespace mpMap
 		uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
 		
 		//pre-cache some data, so it doesn't need to be recomputed in a deeply nested loop
-		int nGroups = uniqueGroups.size();
+		size_t nGroups = uniqueGroups.size();
 		int* startGroups = new int[nGroups];
 		int* endGroups = new int[nGroups];
 		std::vector<std::vector<int> > expectedIndices;
@@ -789,7 +788,7 @@ namespace mpMap
 				located = imageTile::find(imageTiles, rowGroup, columnGroup);
 				if(located == imageTiles.end())
 				{
-					imageTile newTile = imageTile(originalDataToChar, nMarkers, rowGroup, columnGroup, expectedRowIndices, expectedColumnIndices, graphicsScene);
+					imageTile newTile = imageTile(originalDataToChar, nOriginalMarkers, rowGroup, columnGroup, expectedRowIndices, expectedColumnIndices, graphicsScene);
 					imageTiles.insert(newTile);
 				}
 				//set position
@@ -895,6 +894,22 @@ delete_tile:
 			signalMouseMove();
 		}
 	}
+	void qtPlot::doImputation()
+	{
+		if(imputedRawImageData == NULL) imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
+		
+		memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
+		//a vector of linkage groups, which assigns a group to EVERY MARKER ORIGINALLY PRESENT
+		const std::vector<int>& oldGroups = data->getCurrentGroups();
+		int additionalGroupNumber = *std::max_element(oldGroups.begin(), oldGroups.end()) + 1;
+		std::vector<int> newGroups(nOriginalMarkers, additionalGroupNumber);
+		const std::vector<int>& currentPermutation = data->getCurrentPermutation();
+		for(int i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
+		std::string error;
+		error.resize(200);
+		bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);
+		if(!ok) throw std::runtime_error("Imputation failed!");
+	}
 	void qtPlot::keyPressEvent(QKeyEvent* event)
 	{
 		int nMarkers = data->getMarkerCount();
@@ -920,7 +935,7 @@ delete_tile:
 					return;
 				}
 			}
-			if(event->key() == Qt::Key_O && (event->modifiers() & Qt::ControlModifier) && imputedRawImageData != NULL)
+			if(event->key() == Qt::Key_O && (event->modifiers() & Qt::ControlModifier))
 			{
 					if(attemptBeginComputation())
 					{
@@ -932,22 +947,12 @@ delete_tile:
 						if(ret == QMessageBox::Yes)
 						{
 							//do the imputation again - If groups have been joined then we could end up with NAs in the recombination fraction matrix. Remember that the imputation only removes NAs between markers IN THE SAME GROUP, using the group structure as currently set. We need to assign a group to EVERY marker that was ORIGINALLY here. So everything that has been deleted, and therefore doesn't have a group, goes in (max(group) + 1). 
-							memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
-							//a vector of linkage groups, which assigns a group to EVERY MARKER ORIGINALLY PRESENT
-							const std::vector<int>& oldGroups = data->getCurrentGroups();
-							int additionalGroupNumber = *std::max_element(oldGroups.begin(), oldGroups.end()) + 1;
-							std::vector<int> newGroups(nOriginalMarkers, additionalGroupNumber);
-							const std::vector<int>& currentPermutation = data->getCurrentPermutation();
-							for(int i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
-							std::string error;
-							error.resize(200);
-							bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);
-							if(!ok) throw std::runtime_error("Imputation failed!");
+							doImputation();
 							
 							std::vector<int> uniqueGroups = data->getCurrentGroups();
 							std::sort(uniqueGroups.begin(), uniqueGroups.end());
 							uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
-							int nGroups = uniqueGroups.size();
+							size_t nGroups = uniqueGroups.size();
 							
 							QRegExp intListRegex(QString("(\\d+)"));
 							QString exceptionsText = orderAllExcept->text();
@@ -1031,6 +1036,9 @@ delete_tile:
 				//See documentation for attemptBeginComputation
 				if(startIntervalPos > -1 && endIntervalPos > -1 && attemptBeginComputation())
 				{
+					//we only need to do imputation here if it hasn't been done previously.
+					//Reason: This option is only available if there's only one group. In which case no group joining is possible
+					if(imputedRawImageData == NULL) doImputation();
 					//permutation from just the submatrix
 					std::vector<int> resultingPermutation;
 					//the identity

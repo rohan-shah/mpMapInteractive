@@ -62,6 +62,7 @@ namespace mpMap
 		void modeChanged(const QString&);
 	private:
 		void setBoundingBox(int nMarkers);
+		void doImputation();
 
 		void setIntervalHighlighting(int start, int end);
 		void deleteIntervalHighlighting();
