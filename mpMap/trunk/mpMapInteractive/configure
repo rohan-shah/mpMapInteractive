@@ -12,17 +12,11 @@ fi
 
 cd src
 export QMAKESPEC=${QT_DIRECTORY}/mkspecs/macx-clang
-${QT_DIRECTORY}/bin/qmake mac.pro
+${QT_DIRECTORY}/bin/qmake mac.pro -o mac.Makefile
 
 mode=release
 
 mkdir -p "${R_PACKAGE_DIR}/libs/${R_ARCH}/platforms"
-mkdir -p "${R_PACKAGE_DIR}/libs/${R_ARCH}"
-make clean
-if [ "$mode" = "release" ]; then
-	make
-else
-	make
-fi
+make -f mac.Makefile
 cd ..
 
