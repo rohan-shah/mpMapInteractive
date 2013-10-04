@@ -9,11 +9,10 @@
 #include <set>
 #include "imageTileComparer.h"
 #include "imageTile.h"
-//An import from mpMap
-extern "C"
-{
-	bool imputeInternal(double* theta, double* lod, double* lkhd, int nMarkers, int* groups, char* error, int errorLength);
-}
+//extern "C"
+//{
+//	bool imputeInternal(double* theta, double* lod, double* lkhd, int nMarkers, int* groups, char* error, int errorLength);
+//}
 namespace mpMap
 {
 	struct qtPlotData
