@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rcpp", "Rcpp\Rcpp.vcxproj", "{D4B17BA5-30C2-40BA-8BEF-F216FC1C3BE6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpMapInteractive", "mpMapInteractive\mpMapInteractive.vcxproj", "{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D4B17BA5-30C2-40BA-8BEF-F216FC1C3BE6} = {D4B17BA5-30C2-40BA-8BEF-F216FC1C3BE6}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,13 +32,11 @@ Global
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Debug|Win32.Build.0 = Debug|Win32
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Debug|x64.ActiveCfg = Debug|x64
-		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Debug|x64.Build.0 = Debug|x64
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|Win32.ActiveCfg = Release|Win32
 		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|Win32.Build.0 = Release|Win32
-		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|x64.ActiveCfg = Release|x64
-		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|x64.Build.0 = Release|x64
+		{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
