@@ -1,9 +1,0 @@
-TEMPLATE = lib
-HEADERS += interface.h qtPlot.h interface2.h colour.h ZoomGraphicsView.h order.h imageTileComparer.h imageTile.h
-SOURCES += interface.cpp qtPlot.cpp interface2.cpp colour.cpp ZoomGraphicsView.cpp order.cpp imageTileComparer.cpp imageTile.cpp
-LIBPATH += $$quote(C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64)
-LIBPATH += $$quote($$(R_HOME)\bin\x64)
-LIBPATH += $$quote($$(R_HOME)\library\mpMap\libs\x64)
-QT += widgets
-INCLUDEPATH += "$$(R_HOME)/include"
-LIBS+= R.lib mpMap.lib
