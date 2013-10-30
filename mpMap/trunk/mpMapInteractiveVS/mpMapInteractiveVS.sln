@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rcpp", "Rcpp\Rcpp.vcxproj", "{D4B17BA5-30C2-40BA-8BEF-F216FC1C3BE6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpMapInteractive", "mpMapInteractive\mpMapInteractive.vcxproj", "{6BAC973C-2EE5-329B-9EE7-1F7211B7154D}"

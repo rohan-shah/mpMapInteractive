@@ -20,7 +20,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b"$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
-    <QTDIR>D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64</QTDIR>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;$(PATH)</LocalDebuggerEnvironment>
@@ -42,6 +41,5 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b"$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
-    <QTDIR>D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64</QTDIR>
   </PropertyGroup>
 </Project>

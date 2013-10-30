@@ -27,16 +27,16 @@ if %1 == x64 (
 	cd ..
 )
 if %1 == Win32 (
-	if not exist i386 (
-		mkdir i386
+	if not exist Win32 (
+		mkdir Win32
 	)
-	cd x64
+	cd Win32
 	if not exist R.lib (
 		echo Generating R.lib, 32-bit...
 		echo LIBRARY R > R.def
 		echo EXPORTS >> R.def
 		dumpbin /exports "%R_HOME%/bin/i386/R.dll" | sed -n "s/     ...... .... 0....... \([^ ]*\)/    \1/p" >> R.def
-		lib /machine:IX386 /nodefaultlib /def:R.def
+		lib /machine:X86 /nodefaultlib /def:R.def
 		echo Finished generating R.lib
 	)
 	if not exist mpMap.lib (
@@ -44,7 +44,7 @@ if %1 == Win32 (
 		echo LIBRARY mpMap > mpMap.def
 		echo EXPORTS >> mpMap.def
 		dumpbin /exports "%R_HOME%/library/mpMap/libs/i386/mpMap.dll" | sed -n "s/     ...... .... 0....... \([^ ]*\)/    \1/p" >> mpMap.def
-		lib /machine:IX386 /nodefaultlib /def:mpMap.def
+		lib /machine:X86 /nodefaultlib /def:mpMap.def
 		echo Finished generating R.lib
 	)
 	cd ..
