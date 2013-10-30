@@ -99,7 +99,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>"$(R_HOME)\include";"..\Rcpp";"..\Rcpp\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore";"release";..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(R_HOME)\include;..\Rcpp;..\Rcpp\include;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;"release";$(QTDIR)\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm200 -w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>release\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -117,7 +117,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>R.lib;mpMap.lib;Rcpp.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Core.lib;libEGL.lib;libGLESv2.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
@@ -144,7 +144,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>"$(R_HOME)\include";"..\Rcpp";"..\Rcpp\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore";"release";..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(R_HOME)\include;..\Rcpp;..\Rcpp\include;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;"release";$(QTDIR)\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm200 -w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>release\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -162,7 +162,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>R.lib;mpMap.lib;Rcpp.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Core.lib;libEGL.lib;libGLESv2.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
@@ -192,7 +192,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>"$(R_HOME)\include";"..\Rcpp";"..\Rcpp\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore";"debug";..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(R_HOME)\include;..\Rcpp;..\Rcpp\include;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;"debug";$(QTDIR)\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm200 -w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -211,7 +211,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>R.lib;mpMap.lib;Rcpp.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Cored.lib;libEGLd.lib;libGLESv2d.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
@@ -237,7 +237,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>"$(R_HOME)\include";"..\Rcpp";"..\Rcpp\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE";"..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore";"debug";..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(R_HOME)\include;..\Rcpp;..\Rcpp\include;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;"debug";$(QTDIR)\mkspecs\win32-msvc2012;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm200 -w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -256,7 +256,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>R.lib;mpMap.lib;Rcpp.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Cored.lib;libEGLd.lib;libGLESv2d.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);D:\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64";..\libs\$(Platform);..\$(Platform)\$(Configuration);$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
@@ -309,12 +309,12 @@
     <ClInclude Include="..\..\mpMapInteractiveRPackage\src\interface.h" />
     <ClInclude Include="..\..\mpMapInteractiveRPackage\src\order.h" />
     <CustomBuild Include="..\..\mpMapInteractiveRPackage\src\qtPlot.h">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG -D_WINDLL "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore" "-I.\release" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_WINDLL "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore" "-I.\release" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG -D_WINDLL  "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\win32-msvc2012"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_WINDLL  "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2012"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qtPlot.h...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing qtPlot.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -D_WINDLL "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore" "-I.\debug" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_WINDLL "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtWidgets" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtGui" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtANGLE" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\include\QtCore" "-I.\debug" "-I.\..\..\..\..\..\..\Programming\Qt\Qt5.1.1\5.1.1\msvc2012_64\mkspecs\win32-msvc2012"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -D_WINDLL  "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2012"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_WINDLL  "-I$(R_HOME)\include" "-I.\..\Rcpp" "-I.\..\Rcpp\include" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2012"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qtPlot.h...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing qtPlot.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
