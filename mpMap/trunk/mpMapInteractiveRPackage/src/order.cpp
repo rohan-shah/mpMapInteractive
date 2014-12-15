@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <R.h>
 #include <Rdefines.h>
+#include <cstdint>
 namespace mpMap
 {
 	SEXP makeCall(std::map<std::string, SEXP> arguments, std::string name)
@@ -110,41 +111,53 @@ namespace mpMap
 				setAttrib(R_submatrix, R_DimSymbol, R_submatrixDim);
 			UNPROTECT(1);
 			double* mem = REAL(R_submatrix);
+			//Determine whether or not the submatrix is zero, as seriation seems to screw up for all-zero matrices.
+			bool nonZero = false;
 			for(int i = 0; i < nSubMarkers; i++)
 			{
 				for(int j = 0; j < nSubMarkers; j++)
 				{
-					mem[i + j * nSubMarkers] = rawData[permutation[i + startIndex] + permutation[j + startIndex] * nOriginalMarkers];
+					double* dest = mem + i + j * nSubMarkers;
+					*dest = rawData[permutation[i + startIndex] + permutation[j + startIndex] * nOriginalMarkers];
+					nonZero |= (*(std::uint64_t*)dest != 0);
 				}
 			}
-			SEXP distSubmatrix;
-			PROTECT(distSubmatrix = asDist(R_submatrix));
+			if(nonZero)
+			{
+				SEXP distSubmatrix;
+				PROTECT(distSubmatrix = asDist(R_submatrix));
 
-				std::string methods[6] = {"TSP", "OLO", "ARSA", "MDS", "GW", "HC"};
-				std::vector<std::vector<int> > methodResults;
-				std::vector<double> objectiveFunctionValues;
+					std::string methods[6] = {"TSP", "OLO", "ARSA", "MDS", "GW", "HC"};
+					std::vector<std::vector<int> > methodResults;
+					std::vector<double> objectiveFunctionValues;
 
-				for(int methodIndex = 0; methodIndex < 6; methodIndex++)
-				{
-					SEXP R_result;
-					std::vector<int> currentMethodResult;
-					PROTECT(R_result = orderInternal(methods[methodIndex], distSubmatrix));
-						getOrder(currentMethodResult, R_result);
-						methodResults.push_back(currentMethodResult);
-						objectiveFunctionValues.push_back(criterion(R_result, distSubmatrix));
-					UNPROTECT(1);
-				}
+					for(int methodIndex = 0; methodIndex < 6; methodIndex++)
+					{
+						SEXP R_result;
+						std::vector<int> currentMethodResult;
+						PROTECT(R_result = orderInternal(methods[methodIndex], distSubmatrix));
+							getOrder(currentMethodResult, R_result);
+							methodResults.push_back(currentMethodResult);
+							objectiveFunctionValues.push_back(criterion(R_result, distSubmatrix));
+						UNPROTECT(1);
+					}
 
-				//now consider identity permutation
-				std::vector<int> identity; 
-				for(int i = 0; i < nSubMarkers; i++) identity.push_back(i+1);
-				methodResults.push_back(identity);
-				objectiveFunctionValues.push_back(criterion(R_NilValue, distSubmatrix));
+					//now consider identity permutation
+					std::vector<int> identity; 
+					for(int i = 0; i < nSubMarkers; i++) identity.push_back(i+1);
+					methodResults.push_back(identity);
+					objectiveFunctionValues.push_back(criterion(R_NilValue, distSubmatrix));
 
-				resultingPermutation = methodResults[std::distance(objectiveFunctionValues.begin(), std::min_element(objectiveFunctionValues.begin(), objectiveFunctionValues.end()))];
-				//Permutation stuff in R is indexed at base 1, but we want it indexed starting at 0.
-				for(int i = 0; i < nSubMarkers; i++) resultingPermutation[i] -= 1;
-			UNPROTECT(1);
+					resultingPermutation = methodResults[std::distance(objectiveFunctionValues.begin(), std::min_element(objectiveFunctionValues.begin(), objectiveFunctionValues.end()))];
+					//Permutation stuff in R is indexed at base 1, but we want it indexed starting at 0.
+					for(int i = 0; i < nSubMarkers; i++) resultingPermutation[i] -= 1;
+				UNPROTECT(1);
+			}
+			else
+			{
+				resultingPermutation.resize(nSubMarkers);
+				for(int i = 0; i < nSubMarkers; i++) resultingPermutation[i] = i;
+			}
 		UNPROTECT(1);
 	}
 }
