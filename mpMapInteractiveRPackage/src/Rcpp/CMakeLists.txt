@@ -1,0 +1,4 @@
+set(SourceFiles api.cpp attributes.cpp barrier.cpp Date.cpp exceptions.cpp extra_math_functions.cpp Rcpp_init.c Timer.cpp)
+set(HeaderFiles extra_math_functions.h internal.h msc_inttypes.h msc_unistd.h)
+add_library(Rcpp STATIC ${SourceFiles} ${HeaderFiles})
+target_include_directories(Rcpp PUBLIC ${PROJECT_SOURCE_DIR}/Rcpp ${PROJECT_SOURCE_DIR}/Rcpp/include ${R_INCLUDE_DIR})

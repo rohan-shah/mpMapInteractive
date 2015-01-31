@@ -1,0 +1,1 @@
+library(mpMap); libs <- .dynLibs(); mpMapIndex <- grep("mpMap", unlist(lapply(libs, function(x) x[["name"]]))); cat(libs[[mpMapIndex]][["path"]], file = "mpMapDll"); 

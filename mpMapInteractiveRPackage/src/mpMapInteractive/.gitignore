@@ -1,0 +1,9 @@
+CMakeFiles/
+moc_*
+mpMapInteractive.dll.*
+*.cmake
+mpMapInteractive.exp
+mpMapInteractive.ilk
+mpMapInteractive.lib
+mpMapInteractive.pdb
+Makefile

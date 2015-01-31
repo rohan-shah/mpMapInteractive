@@ -1,3 +1,6 @@
+#ifndef _MSC_VER
+#error "This file only to be included when compiling with Microsoft Visual Studio"
+#endif
 #ifndef _UNISTD_H
 #define _UNISTD_H
 
