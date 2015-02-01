@@ -1,3 +1,11 @@
 *.dll
 Makefile.win
 build/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+/mpMapInteractive.so
+/mpMapInteractive/mpMapInteractive.so
+Rcpp/libRcpp.a
+install_manifest.txt

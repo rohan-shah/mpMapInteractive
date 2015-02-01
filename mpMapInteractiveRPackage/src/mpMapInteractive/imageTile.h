@@ -2,7 +2,7 @@
 #define IMAGE_TILE_HEADER_GUARD
 #include "imageTileComparer.h"
 #include <set>
-#include <QgraphicsScene>
+#include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <vector>
 namespace mpMap

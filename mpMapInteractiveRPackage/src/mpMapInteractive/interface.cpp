@@ -95,8 +95,13 @@ extern "C"
 			std::vector<int> outputGroups;
 
 			{
-				char* argv[] = {""};
-				int argc = 0;
+				char* argv[3];
+				argv[0] = new char[1];
+				argv[1] = new char[1];
+				argv[2] = new char[1];
+				argv[0][0] = argv[1][0] = argv[2][0] = 0;
+
+				int argc = 1;
 				QApplication app(argc, argv);
 		
 				std::vector<int> groupsVector = Rcpp::as<std::vector<int> >(groups);
@@ -106,6 +111,10 @@ extern "C"
 				const mpMap::qtPlotData& outputData = plot.getData();
 				outputGroups = outputData.getCurrentGroups();
 				outputMarkerNames = outputData.getCurrentMarkerNames();
+
+				delete[] argv[0];
+				delete[] argv[1];
+				delete[] argv[2];
 			}
 			Rcpp::CharacterVector convertedOutputMarkerNames = Rcpp::wrap(outputMarkerNames);
 			Rcpp::IntegerVector convertedOutputGroups = Rcpp::wrap(outputGroups);

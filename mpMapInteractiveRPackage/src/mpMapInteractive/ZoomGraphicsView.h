@@ -5,6 +5,7 @@ namespace mpMap
 {
 	class ZoomGraphicsView : public QGraphicsView
 	{
+		Q_OBJECT
 	public:
 		ZoomGraphicsView(QGraphicsScene* scene);
 	protected:

@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <R.h>
 #include <Rdefines.h>
-#include <cstdint>
 namespace mpMap
 {
 	SEXP makeCall(std::map<std::string, SEXP> arguments, std::string name)
@@ -119,7 +118,7 @@ namespace mpMap
 				{
 					double* dest = mem + i + j * nSubMarkers;
 					*dest = rawData[permutation[i + startIndex] + permutation[j + startIndex] * nOriginalMarkers];
-					nonZero |= (*(std::uint64_t*)dest != 0);
+					nonZero |= (*dest != 0);
 				}
 			}
 			if(nonZero)

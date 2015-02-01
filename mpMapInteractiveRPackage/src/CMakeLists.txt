@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 project(mpMapInteractive)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 find_package(R REQUIRED)
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	#R does not appear to tell us whether a debug build was selected, so just build a release build every time 
 	set(CMAKE_BUILD_TYPE Release)
@@ -30,8 +32,9 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	message(STATUS "Checking that 64-bit compiler was selected - passed")
 
 	#If we're using MSVC, work out where lib.exe is
+	get_filename_component(COMPILER_PATH "${CMAKE_CXX_COMPILER}" DIRECTORY CACHE)
 	message(STATUS "Searching for lib.exe")
-	find_program(LIB_EXECUTABLE lib PATHS get_filename_component(${CMAKE_CXX_COMPILE} DIRECTORY CACHE))
+	find_program(LIB_EXECUTABLE lib PATHS ${COMPILER_PATH})
 	if(${LIB_EXECUTABLE} STREQUAL LIB_EXECUTABLE-NOTFOUND)
 		message(FATAL_ERROR "Searching for lib.exe - not found")
 	else()
@@ -40,7 +43,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 	#If we're using MSVC, work out where dumpbin.exe is
 	message(STATUS "Searching for dumpbin.exe")
-	find_program(DUMPBIN_EXECUTABLE dumpbin PATHS get_filename_component(${CMAKE_CXX_COMPILE} DIRECTORY CACHE))
+	find_program(DUMPBIN_EXECUTABLE dumpbin PATHS ${COMPILER_PATH})
 	if(${DUMPBIN_EXECUTABLE} STREQUAL DUMPBIN_EXECUTABLE-NOTFOUND)
 		message(FATAL_ERROR "Searching for dumpbin.exe - not found")
 	else()
@@ -64,41 +67,12 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	endif()
 	message(STATUS "Generating import library for R.dll - done")
 
-	message(STATUS "Generating import library for mpMap.dll")
-	#This code gets the list of exported symbols, but we don't need it. We only need imputeInternal, which we hard-code here instead
-		#execute_process(COMMAND "${R_COMMAND}" CMD BATCH ${PROJECT_SOURCE_DIR}/getMpMapDll.R)
-		#file(DELETE ${PROJECT_SOURCE_DIR}/getMpMapDll.Rout)
-		#file(READ "${PROJECT_BINARY_DIR}/mpMapDll" MPMAP_PATH)
-		#file(DELETE "${PROJECT_BINARY_DIR}/mpMapDll")
-		#file(WRITE "${PROJECT_BINARY_DIR}/mpMap.def" "LIBRARY mpMap\n")
-		#file(APPEND "${PROJECT_BINARY_DIR}/mpMap.def" "EXPORTS\n")
-		#execute_process(COMMAND "${DUMPBIN_EXECUTABLE}" /exports "${MPMAP_PATH}" ERROR_QUIET OUTPUT_VARIABLE DUMPBIN_OUTPUT)
-		##Strip off the junk at the start and end
-		#string(REGEX MATCHALL "[ |\t]+[0-9]+[ |\t]+[0-9A-F]+[ |\t]+0[0-9A-F]+[ |\t]+[^\n|\r]+\n" MPMAP_EXPORTS_LIST_UNFILTERED "${DUMPBIN_OUTPUT}")
-		#foreach(symbolline IN LISTS MPMAP_EXPORTS_LIST_UNFILTERED)
-		#	string(REGEX REPLACE "[ |\t]+[0-9]+[ |\t]+[0-9A-F]+[ |\t]+0[0-9A-F]+[ |\t]+([^\n|\r]+)\n" "\t\\1" symbol "${symbolline}")
-		#	file(APPEND "${PROJECT_BINARY_DIR}/mpMap.def" "${symbol}\n")
-		#endforeach(symbolline)
-
-	#hard-coded version
-	file(WRITE "${PROJECT_BINARY_DIR}/mpMap.def" "LIBRARY mpMap\nEXPORTS\nimputeInternal")
-	execute_process(COMMAND "${LIB_EXECUTABLE}" /MACHINE:X64 /nodefaultlib "/def:${PROJECT_BINARY_DIR}/mpMap.def" "/out:${PROJECT_BINARY_DIR}/mpMap.lib" ERROR_QUIET OUTPUT_QUIET)
-	file(REMOVE "${PROJECT_BINARY_DIR}/mpMap.def")
-	if(NOT EXISTS "${PROJECT_BINARY_DIR}/mpMap.lib")
-		message(FATAL_ERROR "Generating import library for mpMap.dll - Error mpMap.lib not found")
-	endif()
-	message(STATUS "Generating import library for mpMap.dll - done")	
-
 	add_definitions(-Dsnprintf=_snprintf)
-	link_libraries(${PROJECT_BINARY_DIR}/R.lib ${PROJECT_BINARY_DIR}/mpMap.lib)
 
 	#Put a Makefile in the source directory
 	find_program(FULL_MAKE_PROGRAM nmake)
 	set(FULL_MAKE_PROGRAM "\"${FULL_MAKE_PROGRAM}\" /f ")
 	configure_file(${PROJECT_SOURCE_DIR}/Makefile.in ${PROJECT_SOURCE_DIR}/Makefile.win @only)
-else()
-	set(FULL_MAKE_PROGRAM "make -f ")
-	configure_file(${PROJECT_SOURCE_DIR}/Makefile.in ${PROJECT_SOURCE_DIR}/Makefile @only)
 endif()
 
 #Make sure everything installed to the right place
@@ -107,3 +81,8 @@ set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}")
 find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
 add_subdirectory(Rcpp)
 add_subdirectory(mpMapInteractive)
+
+if(NOT WIN32)
+	add_custom_target(mpMapInteractive_install ALL COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+	add_dependencies(mpMapInteractive_install mpMapInteractive)
+endif()

@@ -1,4 +1,5 @@
 #include "qtPlot.h"
+#include <R_ext/Rdynload.h>
 #include <sstream>
 #include <QtGui>
 #include "colour.h"
@@ -208,18 +209,19 @@ namespace mpMap
 		group1Edit->setValidator(new QIntValidator());
 		group2Edit = new QLineEdit;
 		group2Edit->setValidator(new QIntValidator());
-
-		setTabOrder(group1Edit, group2Edit);
-		setTabOrder(group2Edit, group1Edit);
 		
 		QObject::connect(group1Edit, SIGNAL(returnPressed()), this, SLOT(group1ReturnPressed()));
 		QObject::connect(group2Edit, SIGNAL(returnPressed()), this, SLOT(group2ReturnPressed()));
 		gotoLayout->addWidget(group1Edit);
 		gotoLayout->addWidget(group2Edit);
+
 		QLabel* gotoLabel = new QLabel("Goto groups (Ctrl + G)");
 		gotoLabel->setPalette(p);
 		formLayout->addRow(gotoLabel, gotoLayout);
 		groupsModeWidget->setLayout(formLayout);
+
+		setTabOrder(group1Edit, group2Edit);
+		setTabOrder(group2Edit, group1Edit);
 
 		QLabel* orderLabel = new QLabel("Order all groups except (Ctrl + O)");
 		orderLabel->setEnabled(true);
@@ -913,6 +915,11 @@ delete_tile:
 		for(size_t i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
 		std::string error;
 		error.resize(200);
+		typedef bool(*imputeInternalType)(double* theta, double* lod, double* lkhd, int nMarkers, int* groups, char* error, int errorLength);
+		imputeInternalType imputeInternal = NULL;
+		imputeInternal = (imputeInternalType)R_GetCCallable("mpMap", "imputeInternal");
+		if(!imputeInternal) throw std::runtime_error("Unable to call mpMap::imputeInternal");
+
 		bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);
 		if(!ok) throw std::runtime_error("Imputation failed!");
 	}
