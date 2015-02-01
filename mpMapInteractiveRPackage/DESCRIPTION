@@ -8,7 +8,8 @@ Maintainer: Rohan Shah <cran@bookshah.com>
 Description: This package provides interactive plotting functions for the mpMap package
 License: GPL v3
 Collate:
-    'onLoad.R'
-	'qtPlot.R'
+   'onLoad.R'
+   'qtPlot.R'
 Depends:
-    mpMap
+    mpMap,
+    seriation
