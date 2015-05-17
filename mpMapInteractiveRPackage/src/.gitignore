@@ -6,6 +6,13 @@ CMakeFiles/
 Makefile
 cmake_install.cmake
 /mpMapInteractive.so
-/mpMapInteractive/mpMapInteractive.so
-Rcpp/libRcpp.a
 install_manifest.txt
+
+CMakeFiles/
+moc_*
+mpMapInteractive.dll.*
+mpMapInteractive.exp
+mpMapInteractive.ilk
+mpMapInteractive.lib
+mpMapInteractive.pdb
+Makefile

@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.1)
 project(mpMapInteractive)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 find_package(R REQUIRED)
+find_package(Rcpp REQUIRED)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
+#Construct R.lib if we're using Visual studio on Windows
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	#R does not appear to tell us whether a debug build was selected, so just build a release build every time 
-	set(CMAKE_BUILD_TYPE Release)
 	message(STATUS "Checking that 64-bit R was selected")
 	execute_process(COMMAND ${R_COMMAND} --no-restore --no-save -e "q()" OUTPUT_VARIABLE R_OUTPUT)
 	string(FIND "${R_OUTPUT}" "64-bit" R_OUTPUT_64_BIT_INDEX)
@@ -69,20 +70,76 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 	add_definitions(-Dsnprintf=_snprintf)
 
-	#Put a Makefile in the source directory
+	#Put a Makefile.win in the source directory
 	find_program(FULL_MAKE_PROGRAM nmake)
 	set(FULL_MAKE_PROGRAM "\"${FULL_MAKE_PROGRAM}\" /f ")
-	configure_file(${PROJECT_SOURCE_DIR}/Makefile.in ${PROJECT_SOURCE_DIR}/Makefile.win @only)
+	configure_file(${PROJECT_SOURCE_DIR}/Makefile.in ${PROJECT_SOURCE_DIR}/Makefile.win @ONLY)
 endif()
 
 #Make sure everything installed to the right place
 set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}")
 
 find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
-add_subdirectory(Rcpp)
-add_subdirectory(mpMapInteractive)
 
-if(NOT WIN32)
-	add_custom_target(mpMapInteractive_install ALL COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-	add_dependencies(mpMapInteractive_install mpMapInteractive)
+#Now add the shared libarry target
+set(SourceFiles colour.cpp imageTile.cpp imageTileComparer.cpp interface.cpp order.cpp qtPlot.cpp register.cpp validateMPCross.cpp ZoomGraphicsView.cpp)
+set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h order.h qtPlot.h validateMPCross.h ZoomGraphicsView.h)
+qt5_wrap_cpp(mpMapInteractive_MOC_SOURCES ZoomGraphicsView.h qtPlot.h)
+add_library(mpMapInteractive SHARED ${SourceFiles} ${HeaderFiles} ${mpMapInteractive_MOC_SOURCES})
+target_link_libraries(mpMapInteractive PRIVATE Rcpp Qt5::Core Qt5::Widgets)
+
+#Ensure that it's installed to the right place
+install(TARGETS mpMapInteractive RUNTIME DESTINATION . LIBRARY DESTINATION . COMPONENT Runtime)
+
+#If we're on windows we also need to install the QT libraries to the same place
+if(WIN32)
+	get_target_property(QtCore_location Qt5::Core LOCATION)
+	install(FILES ${QtCore_location} DESTINATION . COMPONENT Runtime)
+
+	GET_FILENAME_COMPONENT(QtBinaryPath ${QtCore_location} PATH)
+	if(EXISTS ${QtBinaryPath}/icuin51.dll)
+		install(FILES ${QtBinaryPath}/icuin51.dll DESTINATION . COMPONENT Runtime)
+	endif()
+	if(EXISTS ${QtBinaryPath}/icuuc51.dll)
+		install(FILES ${QtBinaryPath}/icuuc51.dll DESTINATION . COMPONENT Runtime)
+	endif()
+	if(EXISTS ${QtBinaryPath}/icudt51.dll)
+		install(FILES ${QtBinaryPath}/icudt51.dll DESTINATION . COMPONENT Runtime)
+	endif()
+
+	get_target_property(QtWidgets_location Qt5::Widgets LOCATION)
+	install(FILES ${QtWidgets_location} DESTINATION . COMPONENT Runtime)
+
+	if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+		get_target_property(QtGuiEgl_location Qt5::Gui_EGL LOCATION_DEBUG)
+	else()
+		get_target_property(QtGuiEgl_location Qt5::Gui_EGL LOCATION)
+	endif()
+	install(FILES ${QtGuiEgl_location} DESTINATION . COMPONENT Runtime)
+
+	if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+		get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 LOCATION_DEBUG)
+	else()
+		get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 LOCATION)
+	endif()
+	install(FILES ${QtGuiGlesV2_location} DESTINATION . COMPONENT Runtime)
+
+	
+	if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+		get_target_property(QtGui_location Qt5::Gui LOCATION_DEBUG)
+	else()
+		get_target_property(QtGui_location Qt5::Gui LOCATION)
+	endif()
+	install(FILES ${QtGui_location} DESTINATION . COMPONENT Runtime)
+	target_link_libraries(mpMapInteractive PRIVATE ${PROJECT_BINARY_DIR}/R.lib)
+
+	get_filename_component(QT_LIB_DIR ${QtGui_location} DIRECTORY)
+	if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+		install(FILES ${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll DESTINATION ../inst/libs/x64/platforms COMPONENT Runtime)
+	else()
+		install(FILES ${QT_LIB_DIR}/../plugins/platforms/qwindows.dll DESTINATION ../inst/libs/x64/platforms COMPONENT Runtime)
+	endif()
 endif()
+
+add_custom_target(mpMapInteractive_install ALL COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
+add_dependencies(mpMapInteractive_install mpMapInteractive)

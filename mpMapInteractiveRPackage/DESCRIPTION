@@ -10,6 +10,7 @@ License: GPL v3
 Collate:
    'onLoad.R'
    'qtPlot.R'
+   'Rcpp_exceptions.R'
 Depends:
     mpMap,
     seriation
