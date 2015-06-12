@@ -10,7 +10,7 @@ namespace mpMap
 	SEXP makeCall(std::map<std::string, SEXP> arguments, std::string name)
 	{
 		SEXP call, t;
-		PROTECT(t = call = allocList(arguments.size() + 1));
+		PROTECT(t = call = allocList((int)arguments.size() + 1));
 			SET_TYPEOF(call, LANGSXP);
 			SETCAR(t, install(name.c_str()));
 			t = CDR(t);

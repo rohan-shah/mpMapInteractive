@@ -1,3 +1,12 @@
+qtPlotMpMap2 <- function(mpcross, auxillaryNumeric = NULL)
+{
+	result <- .Call("qtPlotMpMap2", mpcross, auxillaryNumeric, PACKAGE="mpMapInteractive")
+	markerNames <- result[[1]]
+	groups <- result[[2]]
+	names(groups) <- markerNames
+	subsetted <- subset(as(mpcross, "mpcrossRF"), markers = markerNames)
+	return(new("mpcrossLG", subsetted, lg = new("lg", groups = groups, allGroups = unique(groups))))
+}
 qtPlot <- function(mpcross, auxillaryNumeric = NULL)
 {
 	if(!is.null(auxillaryNumeric))
@@ -20,7 +29,18 @@ qtPlot <- function(mpcross, auxillaryNumeric = NULL)
 			stop("Column names of auxillaryNumeric did not match up with marker names of mpcross")
 		}
 	}
-	result <- .Call("qtPlot", mpcross, auxillaryNumeric, PACKAGE="mpMapInteractive")
+	if(inherits(mpcross, "mpcrossLG"))
+	{
+		return(qtPlotMpMap2(mpcross, auxillaryNumeric))
+	}
+	else
+	{
+		return(qtPlotMpMap(mpcross, auxillaryNumeric))	
+	}
+}
+qtPlotMpMap <- function(mpcross, auxillaryNumeric = NULL)
+{
+	result <- .Call("qtPlotMpMap", mpcross, auxillaryNumeric, PACKAGE="mpMapInteractive")
 	markerNames <- result[[1]]
 	groups <- result[[2]]
 	names(groups) <- markerNames

@@ -16,7 +16,7 @@ namespace mpMap
 		
 		for(size_t j = 0; j < columnIndices.size(); j++)
 		{
-			uchar* reorderedData = image->scanLine(j);
+			uchar* reorderedData = image->scanLine((int)j);
 			for(size_t i = 0; i < rowIndices.size(); i++)
 			{
 				reorderedData[i] = data[columnIndices[j] * dataRows + rowIndices[i]];
@@ -38,7 +38,7 @@ namespace mpMap
 		}
 		for(size_t i = 0; i < otherRowIndices.size(); i++)
 		{
-			if(otherRowIndices[i] != rowIndices[i]) return false;
+			if(otherRowIndices[(int)i] != rowIndices[(int)i]) return false;
 		}
 		for(size_t i = 0; i < otherColumnIndices.size(); i++)
 		{

@@ -1,24 +1,30 @@
 #include <vector>
 #include "interface.h"
 #include <Rcpp.h>
-#include "validateMPCross.h"
 #include "qtPlot.h"
+#include <QtWidgets/qapplication.h>
 extern "C"
 {
-	char* package_name = "mpMapInteractive";
-	RcppExport SEXP qtPlot(SEXP mpcross__, SEXP auxillaryNumeric_)
+	//bool validateMPCrossNoError(SEXP mpcross_, int& nFounders, bool checkPedigree = true, bool checkRF = false, bool checkLG = false, bool checkFID = true);
+	typedef bool (*validateMPCrossNoError)(SEXP, int& nFounders, bool checkPedigree, bool checkRF, bool checkLG, bool checkFID);
+	RcppExport SEXP qtPlotMpMap(SEXP mpcross__, SEXP auxillaryNumeric_)
 	{
 	BEGIN_RCPP
 		int nFounders;
 		std::string error;
 		Rcpp::RObject mpcross_(mpcross__);
-		bool valid = validateMPCross(mpcross_, nFounders, error, false, true, false, false);
+		validateMPCrossNoError functionPtr = (validateMPCrossNoError)R_GetCCallable("mpMap", "validateMPCrossNoError");
+		if(functionPtr == NULL)
+		{
+			throw std::runtime_error("Package mpMap must be loaded in order to call qtPlot with an mpMap object");
+		}
+		bool valid = functionPtr(mpcross_, nFounders, false, true, false, false);
 		if(!valid)
 		{
-			throw std::runtime_error(error);
+			throw std::runtime_error("Input mpcross object was invalid, please run validate(object)");
 		}
 		{
-			bool hasLG = validateMPCross(mpcross_, nFounders, error, false, true, true, false);
+			bool hasLG = functionPtr(mpcross_, nFounders, false, true, true, false);
 			Rcpp::List mpcross(mpcross__);
 			Rcpp::List rf = Rcpp::as<Rcpp::List>(mpcross["rf"]);
 			Rcpp::NumericMatrix theta(Rcpp::as<Rcpp::NumericMatrix>(rf["theta"]));
@@ -123,24 +129,5 @@ extern "C"
 			return retVal;
 		}
 	END_RCPP
-	}
-	//here we need to pass in the directory in which this shared library is located. In the case of dynamic linkage to QT, we need to register this path so that QT can find the plugins directory
-	Q_DECL_EXPORT SEXP loadQT()
-	{
-		QCoreApplication::addLibraryPath(QString("."));
-		//only needs to be called once
-		static bool called = false;
-		if(called) return R_NilValue;
-
-		char* empty = new char[1];
-		*empty = 0;
-		char* argv[] = {empty};
-
-		int argc = 0;
-		//We make an attempt here to tripper the QT runtime, at which point it will load up all the required plugins, while the 
-		//working directory is correctly set. 
-		QApplication app(argc, argv);
-		delete[] empty;
-		return R_NilValue;
 	}
 }

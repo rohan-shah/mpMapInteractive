@@ -981,7 +981,7 @@ delete_tile:
 							QProgressBar* progress = new QProgressBar;
 							statusBar->addWidget(progress);
 							progress->setMinimum(0);
-							progress->setMaximum(nGroups - exceptionsList.size());
+							progress->setMaximum((int)(nGroups - exceptionsList.size()));
 							
 							for(int groupCounter = 0; groupCounter < nGroups; groupCounter++)
 							{
