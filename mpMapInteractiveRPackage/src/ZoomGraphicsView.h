@@ -1,7 +1,7 @@
 #ifndef ZOOM_GRAPHICS_HEADER_GUARD
 #define ZOOM_GRAPHICS_HEADER_GUARD
 #include <QGraphicsView>
-namespace mpMap
+namespace mpMapInteractive
 {
 	class ZoomGraphicsView : public QGraphicsView
 	{

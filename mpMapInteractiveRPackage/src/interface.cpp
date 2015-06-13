@@ -44,7 +44,7 @@ extern "C"
 					{
 						Rcpp::NumericVector tmp = Rcpp::as<Rcpp::NumericVector>(groups_);
 						groups = Rcpp::IntegerVector(tmp.size());
-						std::copy(tmp.begin(), tmp.end(), groups.begin());
+						for(int i = 0; i < tmp.size(); i++) groups[i] = (int)tmp[i];
 					}
 				}
 			}
@@ -112,10 +112,10 @@ extern "C"
 				QApplication app(argc, argv);
 		
 				std::vector<int> groupsVector = Rcpp::as<std::vector<int> >(groups);
-				mpMap::qtPlot plot(&(theta[0]), groupsVector, markerNames, auxData, auxRows);
+				mpMapInteractive::qtPlot plot(&(theta[0]), groupsVector, markerNames, auxData, auxRows);
 				plot.show();
 				app.exec();
-				const mpMap::qtPlotData& outputData = plot.getData();
+				const mpMapInteractive::qtPlotData& outputData = plot.getData();
 				outputGroups = outputData.getCurrentGroups();
 				outputMarkerNames = outputData.getCurrentMarkerNames();
 

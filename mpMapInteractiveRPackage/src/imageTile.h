@@ -5,7 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <vector>
-namespace mpMap
+namespace mpMapInteractive
 {
 	class imageTile
 	{

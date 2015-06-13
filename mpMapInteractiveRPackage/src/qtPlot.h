@@ -9,7 +9,7 @@
 #include <set>
 #include "imageTileComparer.h"
 #include "imageTile.h"
-namespace mpMap
+namespace mpMapInteractive
 {
 	struct qtPlotData
 	{

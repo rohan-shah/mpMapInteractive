@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <R.h>
 #include <Rdefines.h>
-namespace mpMap
+namespace mpMapInteractive
 {
 	SEXP makeCall(std::map<std::string, SEXP> arguments, std::string name)
 	{

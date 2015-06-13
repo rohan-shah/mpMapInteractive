@@ -2,7 +2,7 @@
 #define COLOUR_HEADER_GUARD
 #include <QColor>
 #include <QVector>
-namespace mpMap
+namespace mpMapInteractive
 {
 	static const int nColours = 100;
 	void constructColourTable(int n, QVector<QRgb>& vector);

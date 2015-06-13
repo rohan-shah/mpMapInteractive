@@ -1,6 +1,6 @@
 #include "imageTile.h"
 #include "colour.h"
-namespace mpMap
+namespace mpMapInteractive
 {
 	imageTile::~imageTile()
 	{

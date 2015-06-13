@@ -12,5 +12,4 @@ Collate:
    'qtPlot.R'
    'Rcpp_exceptions.R'
 Depends:
-    mpMap,
     seriation

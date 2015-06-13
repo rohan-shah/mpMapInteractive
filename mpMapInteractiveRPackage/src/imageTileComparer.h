@@ -1,6 +1,6 @@
 #ifndef IMAGE_TILE_COMPARER_HEADER_GUARD
 #define IMAGE_TILE_COMPARER_HEADER_GUARD
-namespace mpMap
+namespace mpMapInteractive
 {
 	class imageTile;
 	struct imageTileComparer

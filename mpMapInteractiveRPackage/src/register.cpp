@@ -16,9 +16,9 @@ extern "C"
 	};
 	RcppExport void R_init_mpMapInteractive(DllInfo *info)
 	{
+		R_registerRoutines(info, NULL, callMethods, NULL, NULL);
 #ifdef CUSTOM_STATIC_RCPP
 		R_init_Rcpp(info);
 #endif
-		R_registerRoutines(info, NULL, callMethods, NULL, NULL);
 	}
 }

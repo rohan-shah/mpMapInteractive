@@ -1,7 +1,7 @@
 #include "ZoomGraphicsView.h"
 #include <QWheelEvent>
 #include <QGraphicsScene>
-namespace mpMap
+namespace mpMapInteractive
 {
 	ZoomGraphicsView::ZoomGraphicsView(QGraphicsScene* scene)
 		:QGraphicsView(scene)

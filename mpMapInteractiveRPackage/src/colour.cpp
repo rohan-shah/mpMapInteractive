@@ -1,5 +1,5 @@
 #include "colour.h"
-namespace mpMap
+namespace mpMapInteractive
 {
 	void constructColourTable(int n, QVector<QRgb>& vector)
 	{

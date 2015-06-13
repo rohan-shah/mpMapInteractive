@@ -1,6 +1,6 @@
 #include "imageTileComparer.h"
 #include "imageTile.h"
-namespace mpMap
+namespace mpMapInteractive
 {
 	bool imageTileComparer::operator()(const imageTile& first, const imageTile& second) const
 	{

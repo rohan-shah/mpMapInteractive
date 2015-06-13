@@ -1,10 +1,13 @@
 qtPlotMpMap2 <- function(mpcross, auxillaryNumeric = NULL)
 {
+	library(mpMap2)
 	result <- .Call("qtPlotMpMap2", mpcross, auxillaryNumeric, PACKAGE="mpMapInteractive")
 	markerNames <- result[[1]]
 	groups <- result[[2]]
 	names(groups) <- markerNames
-	subsetted <- subset(as(mpcross, "mpcrossRF"), markers = markerNames)
+	withoutLG <- as(mpcross, "mpcrossRF")
+	selectedMethod <- selectMethod("subset", "mpcrossRF")
+	subsetted <- mpMap2::subset(withoutLG, markers = markerNames)
 	return(new("mpcrossLG", subsetted, lg = new("lg", groups = groups, allGroups = unique(groups))))
 }
 qtPlot <- function(mpcross, auxillaryNumeric = NULL)
@@ -40,6 +43,7 @@ qtPlot <- function(mpcross, auxillaryNumeric = NULL)
 }
 qtPlotMpMap <- function(mpcross, auxillaryNumeric = NULL)
 {
+	library(mpMap)
 	result <- .Call("qtPlotMpMap", mpcross, auxillaryNumeric, PACKAGE="mpMapInteractive")
 	markerNames <- result[[1]]
 	groups <- result[[2]]

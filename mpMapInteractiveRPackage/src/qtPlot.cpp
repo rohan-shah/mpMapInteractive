@@ -20,7 +20,7 @@
 #include "order.h"
 #include <stdexcept>
 #include <cmath>
-namespace mpMap
+namespace mpMapInteractive
 {
 	int qtPlotData::getMarkerCount() const
 	{
