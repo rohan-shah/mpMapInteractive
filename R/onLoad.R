@@ -24,7 +24,7 @@
 	if(class(couldLoad) != "try-error")
 	{
 		setwd(dirname(couldLoad[["path"]]))
-		.Call("loadQt", PACKAGE="mpMapInteractive")
+		.Call("loadQT", PACKAGE="mpMapInteractive")
 		setwd(wd)
 	}
 }
