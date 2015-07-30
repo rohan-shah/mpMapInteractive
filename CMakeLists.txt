@@ -13,15 +13,13 @@ set(RFiles onLoad.R qtPlot.R Rcpp_exceptions.R)
 #This is the target that copies the NAMESPACE, DESCRIPTION and R files to the binary directory
 add_custom_target(copyPackage ALL)
 #If we're on visual studio and not using NMake makefiles, assume that we're building a visual studio project, which has multiple configuration subfolders
+if(WIN32 AND (NOT USE_CUSTOM_RCPP))
+	message(FATAL On windows you must specify USE_CUSTOM_RCPP)
+endif()
 if(WIN32 AND (NOT "${CMAKE_GENERATOR}" STREQUAL "NMake Makefiles"))
 	foreach(BUILD_TYPE IN LISTS CMAKE_CONFIGURATION_TYPES)
 		#If we're using a custom Rcpp, copy one DESCRIPTION file
-		if(USE_CUSTOM_RCPP)
-			add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTIONCustomRcpp ${CMAKE_BINARY_DIR}/${BUILD_TYPE}/DESCRIPTION)
-		#otherwise use the other
-		else()
-			add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTIONStandardRcpp ${CMAKE_BINARY_DIR}/${BUILD_TYPE}/DESCRIPTION)
-		endif()
+		add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTIONCustomRcpp ${CMAKE_BINARY_DIR}/${BUILD_TYPE}/DESCRIPTION)
 		#Copy NAMESPACE
 		add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/NAMESPACE ${CMAKE_BINARY_DIR}/${BUILD_TYPE}/NAMESPACE)
 		#Copy R files
