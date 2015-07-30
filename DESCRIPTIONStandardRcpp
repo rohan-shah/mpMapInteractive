@@ -12,4 +12,6 @@ Collate:
    'qtPlot.R'
    'Rcpp_exceptions.R'
 Depends:
-    seriation
+    seriation,
+    Rcpp
+LinkingTo: Rcpp

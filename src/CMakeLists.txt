@@ -1,8 +1,4 @@
 cmake_minimum_required(VERSION 3.1)
-project(mpMapInteractive)
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-find_package(R REQUIRED)
-find_package(Rcpp REQUIRED)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 #Construct R.lib if we're using Visual studio on Windows
@@ -73,66 +69,98 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	#Put a Makefile.win in the source directory
 	find_program(FULL_MAKE_PROGRAM nmake)
 	set(FULL_MAKE_PROGRAM "\"${FULL_MAKE_PROGRAM}\" /f ")
-	configure_file(${PROJECT_SOURCE_DIR}/Makefile.in ${PROJECT_SOURCE_DIR}/Makefile.win @ONLY)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in ${CMAKE_CURRENT_BINARY_DIR}/Makefile.win @ONLY)
 endif()
-
-#Make sure everything installed to the right place
-set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}")
 
 find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
 
-#Now add the shared libarry target
+#Now add the shared library target
 set(SourceFiles colour.cpp imageTile.cpp imageTileComparer.cpp interface.cpp interface2.cpp order.cpp qtPlot.cpp register.cpp ZoomGraphicsView.cpp loadQt.cpp)
 set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h interface2.h order.h qtPlot.h ZoomGraphicsView.h  loadQt.h)
 qt5_wrap_cpp(mpMapInteractive_MOC_SOURCES ZoomGraphicsView.h qtPlot.h)
 add_library(mpMapInteractive SHARED ${SourceFiles} ${HeaderFiles} ${mpMapInteractive_MOC_SOURCES})
 target_link_libraries(mpMapInteractive PRIVATE Rcpp Qt5::Core Qt5::Widgets)
 
-#Ensure that it's installed to the right place
-install(TARGETS mpMapInteractive RUNTIME DESTINATION . LIBRARY DESTINATION . COMPONENT Runtime)
-
-#If we're on windows we also need to install the QT libraries to the same place
+#If we're on windows we need to copy the QT libraries to the right
 if(WIN32)
-	get_target_property(QtCore_location Qt5::Core LOCATION)
-	install(FILES ${QtCore_location} DESTINATION . COMPONENT Runtime)
+	target_compile_definitions(mpMapInteractive PUBLIC _CRT_SECURE_NO_WARNINGS)
+	if(NOT "${CMAKE_GENERATOR}" STREQUAL "NMake Makefiles")
+		#Build types and corresponding QT build types
+		set(BUILD_TYPES Release Debug RelWithDebInfo MinSizeRel)
+		set(QT_BUILD_TYPES Release Debug Release Release)
+		foreach(val RANGE 3)
+			list(GET BUILD_TYPES ${val} BUILD_TYPE)
+			list(GET QT_BUILD_TYPES ${val} QT_BUILD_TYPE)
+			string(TOUPPER ${QT_BUILD_TYPE} QT_BUILD_TYPE_UPPER)
+			string(TOUPPER ${BUILD_TYPE} BUILD_TYPE_UPPER)
 
-	GET_FILENAME_COMPONENT(QtBinaryPath ${QtCore_location} PATH)
-	if(EXISTS ${QtBinaryPath}/icuin51.dll)
-		install(FILES ${QtBinaryPath}/icuin51.dll DESTINATION . COMPONENT Runtime)
-	endif()
-	if(EXISTS ${QtBinaryPath}/icuuc51.dll)
-		install(FILES ${QtBinaryPath}/icuuc51.dll DESTINATION . COMPONENT Runtime)
-	endif()
-	if(EXISTS ${QtBinaryPath}/icudt51.dll)
-		install(FILES ${QtBinaryPath}/icudt51.dll DESTINATION . COMPONENT Runtime)
-	endif()
+			get_target_property(QtCore_location Qt5::Core "LOCATION_${QT_BUILD_TYPE}")
+			file(COPY ${QtCore_location} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
 
-	if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-		get_target_property(QtGuiEgl_location Qt5::Gui_EGL LOCATION_DEBUG)
-		get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 LOCATION_DEBUG)
-		get_target_property(QtGui_location Qt5::Gui LOCATION_DEBUG)
-		get_target_property(QtCore_location Qt5::Core LOCATION_DEBUG)
-		get_target_property(QtWidgets_location Qt5::Widgets LOCATION_DEBUG)
-		get_filename_component(QT_LIB_DIR ${QtGui_location} DIRECTORY)
-		set(QtWindows_location ${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll)
+			GET_FILENAME_COMPONENT(QtBinaryPath ${QtCore_location} PATH)
+			if(EXISTS ${QtBinaryPath}/icuin51.dll)
+				file(COPY ${QtBinaryPath}/icuin51.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+				file(COPY ${QtBinaryPath}/icuuc51.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+				file(COPY ${QtBinaryPath}/icudt51.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+			endif()
+
+			get_target_property(QtWidgets_location Qt5::Widgets "LOCATION_${QT_BUILD_TYPE}")
+			file(COPY "${QtWidgets_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+
+			get_target_property(QtGuiEgl_location Qt5::Gui_EGL "LOCATION_${QT_BUILD_TYPE}")
+			file(COPY "${QtGuiEgl_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+
+			get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 "LOCATION_${QT_BUILD_TYPE}")
+			file(COPY "${QtGuiGlesV2_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+
+			get_target_property(QtGui_location Qt5::Gui "LOCATION_${QT_BUILD_TYPE}")
+			file(COPY "${QtGui_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+			target_link_libraries(mpMapInteractive PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/../R.lib")
+
+			#Now for platform stuff
+			get_filename_component(QT_LIB_DIR "${QtGui_location}" DIRECTORY)
+			if(EXISTS ${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll)
+				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll" DESTINATION "${CMAKE_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
+			endif()
+			if(EXISTS "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll")
+				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll" DESTINATION "${CMAKE_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
+			endif()
+
+			set_target_properties(mpMapInteractive PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${BUILD_TYPE_UPPER} ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/ PDB_OUTPUT_DIRECTORY_${BUILD_TYPE_UPPER} ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
+		endforeach()
 	else()
-		get_target_property(QtGuiEgl_location Qt5::Gui_EGL LOCATION)
-		get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 LOCATION)
-		get_target_property(QtGui_location Qt5::Gui LOCATION)
-		get_target_property(QtCore_location Qt5::Core LOCATION)
-		get_target_property(QtWidgets_location Qt5::Widgets LOCATION)
-		get_filename_component(QT_LIB_DIR ${QtGui_location} DIRECTORY)
-		set(QtWindows_location ${QT_LIB_DIR}/../plugins/platforms/qwindows.dll)
-	endif()
-	
-	install(FILES ${QtGuiEgl_location} DESTINATION . COMPONENT Runtime)
-	install(FILES ${QtGuiGlesV2_location} DESTINATION . COMPONENT Runtime)
-	install(FILES ${QtGui_location} DESTINATION . COMPONENT Runtime)
-	install(FILES ${QtWindows_location} DESTINATION ../inst/libs/x64/platforms COMPONENT Runtime)
-	install(FILES ${QtCore_location} DESTINATION . COMPONENT Runtime)
-	install(FILES ${QtWidgets_location} DESTINATION . COMPONENT Runtime)
-	target_link_libraries(mpMapInteractive PRIVATE ${PROJECT_BINARY_DIR}/R.lib)
-endif()
+		get_target_property(QtCore_location Qt5::Core "LOCATION_${QT_BUILD_TYPE}")
+		file(COPY ${QtCore_location} DESTINATION ${CMAKE_BINARY_DIR}/../inst/libs/x64/)
 
-add_custom_target(mpMapInteractive_install ALL COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
-add_dependencies(mpMapInteractive_install mpMapInteractive)
+		GET_FILENAME_COMPONENT(QtBinaryPath ${QtCore_location} PATH)
+		if(EXISTS ${QtBinaryPath}/icuin51.dll)
+			file(COPY ${QtBinaryPath}/icuin51.dll DESTINATION ${CMAKE_BINARY_DIR}/../inst/libs/x64/)
+			file(COPY ${QtBinaryPath}/icuuc51.dll DESTINATION ${CMAKE_BINARY_DIR}/../inst/libs/x64/)
+			file(COPY ${QtBinaryPath}/icudt51.dll DESTINATION ${CMAKE_BINARY_DIR}/../inst/libs/x64/)
+		endif()
+
+		get_target_property(QtWidgets_location Qt5::Widgets "LOCATION_${QT_BUILD_TYPE}")
+		file(COPY "${QtWidgets_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
+		get_target_property(QtGuiEgl_location Qt5::Gui_EGL "LOCATION_${QT_BUILD_TYPE}")
+		file(COPY "${QtGuiEgl_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../inst/libs/x64/)
+
+		get_target_property(QtGuiGlesV2_location Qt5::Gui_GLESv2 "LOCATION_${QT_BUILD_TYPE}")
+		file(COPY "${QtGuiGlesV2_location}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../inst/libs/x64/)
+
+		get_target_property(QtGui_location Qt5::Gui "LOCATION_${QT_BUILD_TYPE}")
+		file(COPY "${QtGui_location}" DESTINATION ${CMAKE_BINARY_DIR}/../inst/libs/x64/)
+		target_link_libraries(mpMapInteractive PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/../R.lib")
+
+		#Now for platform stuff
+		get_filename_component(QT_LIB_DIR "${QtGui_location}" DIRECTORY)
+		if(EXISTS ${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll)
+			file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll" DESTINATION "${CMAKE_BINARY_DIR}/../inst/libs/x64/platforms/")
+		endif()
+		if(EXISTS "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll")
+			file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll" DESTINATION "${CMAKE_BINARY_DIR}/../inst/libs/x64/platforms/")
+		endif()
+
+		set_target_properties(mpMapInteractive PROPERTIES RUNTIME_OUTUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../inst/libs/x64/ PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../inst/libs/x64/)
+	endif()
+endif()
