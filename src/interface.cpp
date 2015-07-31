@@ -78,7 +78,7 @@ extern "C"
 			}
 		
 			int nMarkers = groups.size();
-			Rcpp::List dataDimNames = Rcpp::Language("dimnames", theta).eval();
+			Rcpp::List dataDimNames = theta.attr("dimnames");
 			Rcpp::CharacterVector columnDimNames = dataDimNames[1];
 			std::vector<std::string> markerNames = Rcpp::as<std::vector<std::string> >(columnDimNames);
 
