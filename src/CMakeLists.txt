@@ -79,8 +79,20 @@ set(SourceFiles colour.cpp imageTile.cpp imageTileComparer.cpp interface.cpp int
 set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h interface2.h order.h qtPlot.h ZoomGraphicsView.h  loadQt.h)
 qt5_wrap_cpp(mpMapInteractive_MOC_SOURCES ZoomGraphicsView.h qtPlot.h)
 add_library(mpMapInteractive SHARED ${SourceFiles} ${HeaderFiles} ${mpMapInteractive_MOC_SOURCES})
-target_link_libraries(mpMapInteractive PRIVATE Rcpp Qt5::Core Qt5::Widgets)
+target_link_libraries(mpMapInteractive PRIVATE Qt5::Core Qt5::Widgets)
 
+if(USE_CUSTOM_RCPP)
+	target_link_libraries(mpMapInteractive PRIVATE Rcpp)
+else()
+	#If we're not using a custom Rcpp library, we need to add the Rcpp include path
+	execute_process(COMMAND ${R_COMMAND} --no-restore --no-save --silent -e "library(Rcpp);Rcpp:::CxxFlags();q()" OUTPUT_VARIABLE RCPP_OUTPUT)
+	string(FIND "${RCPP_OUTPUT}" "\n" NEWLINE_INDEX REVERSE)
+	string(LENGTH "${RCPP_OUTPUT}" RCPP_OUTPUT_LENGTH)
+	math(EXPR SUBSTRING_LENGTH ${RCPP_OUTPUT_LENGTH}-${NEWLINE_INDEX}-1)
+	math(EXPR SUBSTRING_START ${NEWLINE_INDEX}+3)
+	string(SUBSTRING "${RCPP_OUTPUT}" ${SUBSTRING_START} ${SUBSTRING_LENGTH} SECOND_LINE)
+	target_include_directories(mpMapInteractive PRIVATE ${SECOND_LINE})
+endif()
 #If we're on windows we need to copy the QT libraries to the right
 if(WIN32)
 	target_compile_definitions(mpMapInteractive PUBLIC _CRT_SECURE_NO_WARNINGS)
