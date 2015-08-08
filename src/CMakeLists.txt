@@ -76,7 +76,7 @@ find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
 
 #Now add the shared library target
 set(SourceFiles colour.cpp imageTile.cpp imageTileComparer.cpp interface.cpp interface2.cpp order.cpp qtPlot.cpp register.cpp ZoomGraphicsView.cpp loadQt.cpp)
-set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h interface2.h order.h qtPlot.h ZoomGraphicsView.h  loadQt.h)
+set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h interface2.h order.h qtPlot.h ZoomGraphicsView.h loadQt.h)
 qt5_wrap_cpp(mpMapInteractive_MOC_SOURCES ZoomGraphicsView.h qtPlot.h)
 add_library(mpMapInteractive SHARED ${SourceFiles} ${HeaderFiles} ${mpMapInteractive_MOC_SOURCES})
 target_link_libraries(mpMapInteractive PRIVATE Qt5::Core Qt5::Widgets)
@@ -95,6 +95,7 @@ else()
 	math(EXPR SUBSTRING_START ${NEWLINE_INDEX}+3)
 	string(SUBSTRING "${RCPP_OUTPUT}" ${SUBSTRING_START} ${SUBSTRING_LENGTH} SECOND_LINE)
 	target_include_directories(mpMapInteractive PRIVATE ${SECOND_LINE} ${R_INCLUDE_DIR})
+	target_link_libraries(mpMapInteractive PRIVATE ${R_LIBRARY_BASE})
 endif()
 #If we're on windows we need to copy the QT libraries to the right
 if(WIN32)
