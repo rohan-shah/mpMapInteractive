@@ -94,7 +94,7 @@ else()
 	math(EXPR SUBSTRING_LENGTH ${RCPP_OUTPUT_LENGTH}-${NEWLINE_INDEX}-1)
 	math(EXPR SUBSTRING_START ${NEWLINE_INDEX}+3)
 	string(SUBSTRING "${RCPP_OUTPUT}" ${SUBSTRING_START} ${SUBSTRING_LENGTH} SECOND_LINE)
-	target_include_directories(mpMapInteractive PRIVATE ${SECOND_LINE})
+	target_include_directories(mpMapInteractive PRIVATE ${SECOND_LINE} ${R_INCLUDE_DIR})
 endif()
 #If we're on windows we need to copy the QT libraries to the right
 if(WIN32)
