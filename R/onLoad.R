@@ -2,7 +2,7 @@
 {
 	#Are we currently running a test in a seperate process to test if we have graphics?
 	#Don't try this on OSX
-	if(.Platform$OS.type =="unix" && Sys.getenv("TESTING_MPMAP_INTERACTIVE_CAN_LOAD") != "TRUE" && (is.null(Sys.info()) || Sys.info()["sysname"]) != "Darwin")
+	if(.Platform$OS.type =="unix" && Sys.getenv("TESTING_MPMAP_INTERACTIVE_CAN_LOAD") != "TRUE" && (is.null(Sys.info()) || Sys.info()["sysname"] != "Darwin"))
 	{
 		#If not run a test to see if we can load with QT enabled - If we're running headless it terminates the application, and there's no way to prevent this.
 		executable <- commandArgs()[1]
