@@ -1,9 +1,10 @@
 .onLoad <- function(libname, pkgname)
 {
 	#Are we currently running a test in a seperate process to test if we have graphics?
-	if(.Platform$OS.type=="unix" && Sys.getenv("TESTING_MPMAP_INTERACTIVE_CAN_LOAD") != "TRUE")
+	#Don't try this on OSX
+	if(.Platform$OS.type =="unix" && Sys.getenv("TESTING_MPMAP_INTERACTIVE_CAN_LOAD") != "TRUE" && (is.null(Sys.info()) || Sys.info()["sysname"]) != "Darwin")
 	{
-		#If not run a test to see if we can load with QT enabled - If we're running headless and it terminates the application, and there's no way to prevent this.
+		#If not run a test to see if we can load with QT enabled - If we're running headless it terminates the application, and there's no way to prevent this.
 		executable <- commandArgs()[1]
 		libPaths <- do.call(paste0, as.list(deparse(.libPaths())))
 		libPaths <- gsub("\"", "\\\"", libPaths, fixed=TRUE)
