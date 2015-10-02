@@ -87,6 +87,7 @@ target_link_libraries(mpMapInteractive PRIVATE Qt5::Core Qt5::Widgets)
 
 if(USE_CUSTOM_RCPP)
 	target_link_libraries(mpMapInteractive PRIVATE Rcpp)
+	target_compile_definitions(mpMapInteractive PUBLIC CUSTOM_STATIC_RCPP)
 else()
 	#If we're not using a custom Rcpp library, we need to add the Rcpp include path
 	execute_process(COMMAND ${R_COMMAND} --no-restore --no-save --silent -e "library(Rcpp);Rcpp:::CxxFlags();q()" OUTPUT_VARIABLE RCPP_OUTPUT ERROR_VARIABLE RCPP_ERROR)
