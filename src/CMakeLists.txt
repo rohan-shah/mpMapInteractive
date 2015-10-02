@@ -79,6 +79,10 @@ set(SourceFiles colour.cpp imageTile.cpp imageTileComparer.cpp interface.cpp int
 set(HeaderFiles colour.h imageTile.h imageTileComparer.h interface.h interface2.h order.h qtPlot.h ZoomGraphicsView.h loadQt.h)
 qt5_wrap_cpp(mpMapInteractive_MOC_SOURCES ZoomGraphicsView.h qtPlot.h)
 add_library(mpMapInteractive SHARED ${SourceFiles} ${HeaderFiles} ${mpMapInteractive_MOC_SOURCES})
+if(APPLE)
+	#R still expects a .so on OSX, instead of the standard .dynlib
+	set_target_properties(mpMapInteractive PROPERTIES SUFFIX ".so")
+endif()
 target_link_libraries(mpMapInteractive PRIVATE Qt5::Core Qt5::Widgets)
 
 if(USE_CUSTOM_RCPP)
