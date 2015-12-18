@@ -20,6 +20,7 @@
 #include "order.h"
 #include <stdexcept>
 #include <cmath>
+#include "impute.h"
 namespace mpMapInteractive
 {
 	int qtPlotData::getMarkerCount() const
@@ -902,11 +903,8 @@ delete_tile:
 			signalMouseMove();
 		}
 	}
-	void qtPlot::doImputation()
+	void qtPlot::doImputation(int group)
 	{
-		if(imputedRawImageData == NULL) imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
-		
-		memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
 		//a vector of linkage groups, which assigns a group to EVERY MARKER ORIGINALLY PRESENT
 		const std::vector<int>& oldGroups = data->getCurrentGroups();
 		int additionalGroupNumber = *std::max_element(oldGroups.begin(), oldGroups.end()) + 1;
@@ -914,13 +912,8 @@ delete_tile:
 		const std::vector<int>& currentPermutation = data->getCurrentPermutation();
 		for(size_t i = 0; i < currentPermutation.size(); i++) newGroups[currentPermutation[i]] = oldGroups[i];
 		std::string error;
-		error.resize(200);
-		typedef bool(*imputeInternalType)(double* theta, double* lod, double* lkhd, int nMarkers, int* groups, char* error, int errorLength);
-		imputeInternalType imputeInternal = NULL;
-		imputeInternal = (imputeInternalType)R_GetCCallable("mpMap", "imputeInternal");
-		if(!imputeInternal) throw std::runtime_error("Unable to call mpMap::imputeInternal");
 
-		bool ok = imputeInternal(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), &(error[0]), 200);
+		bool ok = impute(imputedRawImageData, NULL, NULL, nOriginalMarkers, &(newGroups[0]), group, error);
 		if(!ok) throw std::runtime_error("Imputation failed!");
 	}
 	void qtPlot::keyPressEvent(QKeyEvent* event)
@@ -959,9 +952,6 @@ delete_tile:
 						int ret = confirm.exec();
 						if(ret == QMessageBox::Yes)
 						{
-							//do the imputation again - If groups have been joined then we could end up with NAs in the recombination fraction matrix. Remember that the imputation only removes NAs between markers IN THE SAME GROUP, using the group structure as currently set. We need to assign a group to EVERY marker that was ORIGINALLY here. So everything that has been deleted, and therefore doesn't have a group, goes in (max(group) + 1). 
-							doImputation();
-							
 							std::vector<int> uniqueGroups = data->getCurrentGroups();
 							std::sort(uniqueGroups.begin(), uniqueGroups.end());
 							uniqueGroups.erase(std::unique(uniqueGroups.begin(), uniqueGroups.end()), uniqueGroups.end());
@@ -976,6 +966,14 @@ delete_tile:
 								bool ok;
 								exceptionsList.push_back(intListRegex.cap(1).toInt(&ok));
 								pos += intListRegex.matchedLength();
+							}
+
+							//do the imputation again - If groups have been joined then we could end up with NAs in the recombination fraction matrix. Remember that the imputation only removes NAs between markers IN THE SAME GROUP, using the group structure as currently set. We need to assign a group to EVERY marker that was ORIGINALLY here. So everything that has been deleted, and therefore doesn't have a group, goes in (max(group) + 1). 
+							if(imputedRawImageData == NULL) imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
+							memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
+							for(std::vector<int>::iterator group = uniqueGroups.begin(); group != uniqueGroups.end(); group++)
+							{
+								if(std::find(exceptionsList.begin(), exceptionsList.end(), *group) == exceptionsList.end()) doImputation(*group);
 							}
 
 							QProgressBar* progress = new QProgressBar;
@@ -1051,7 +1049,7 @@ delete_tile:
 				{
 					//we only need to do imputation here if it hasn't been done previously.
 					//Reason: This option is only available if there's only one group. In which case no group joining is possible
-					if(imputedRawImageData == NULL) doImputation();
+					if(imputedRawImageData == NULL) doImputation(data->getCurrentGroups()[0]);
 					//permutation from just the submatrix
 					std::vector<int> resultingPermutation;
 					//the identity

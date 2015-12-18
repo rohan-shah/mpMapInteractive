@@ -34,7 +34,7 @@ else()
 		add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTIONCustomRcpp ${CMAKE_BINARY_DIR}/DESCRIPTION)
 	#otherwise use the other
 	else()
-		add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTIONStandardRcpp ${CMAKE_BINARY_DIR}/DESCRIPTION)
+		add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION ${CMAKE_BINARY_DIR}/DESCRIPTION)
 	endif()
 	#Copy NAMESPACE
 	add_custom_command(TARGET copyPackage COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/NAMESPACE ${CMAKE_BINARY_DIR}/NAMESPACE)
