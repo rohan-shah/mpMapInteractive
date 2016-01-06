@@ -1049,7 +1049,12 @@ delete_tile:
 				{
 					//we only need to do imputation here if it hasn't been done previously.
 					//Reason: This option is only available if there's only one group. In which case no group joining is possible
-					if(imputedRawImageData == NULL) doImputation(data->getCurrentGroups()[0]);
+					if(imputedRawImageData == NULL) 
+					{
+						imputedRawImageData = new double[nOriginalMarkers * nOriginalMarkers];
+						memcpy(imputedRawImageData, rawImageData, sizeof(double)*nOriginalMarkers * nOriginalMarkers);
+						doImputation(data->getCurrentGroups()[0]);
+					}	
 					//permutation from just the submatrix
 					std::vector<int> resultingPermutation;
 					//the identity

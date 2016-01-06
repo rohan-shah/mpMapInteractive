@@ -2,6 +2,7 @@
 #include "interface.h"
 #include "interface2.h"
 #include "loadQt.h"
+#include <internal.h>
 extern "C"
 {
 	R_CallMethodDef callMethods[] = 
