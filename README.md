@@ -36,5 +36,5 @@ The package can now be compiled by either running nmake in the binaries director
 1. Choose a binaries directory, E.g. **\<mpMapInteractiveRoot\>/release** for a release build. 
 2. Run cmake, specifying the variables Qt5_DIR and R_COMMAND. E.g. for a release build
   
-  cmake `<mpMapInteractivRoot>` -DQt5_DIR=**\<Qt5Root\>/lib/cmake/Qt5** -DCMAKE_BUILD_TYPE=Release -DR_COMMAND=**\<PathToR\>** -DUSE_CUSTOM_RCPP=OFF
+  cmake **\<mpMapInteractivRoot\>** -DQt5_DIR=**\<Qt5Root\>/lib/cmake/Qt5** -DCMAKE_BUILD_TYPE=Release -DR_COMMAND=**\<PathToR\>** -DUSE_CUSTOM_RCPP=OFF
 3. Run make and then make install from the binaries directory
