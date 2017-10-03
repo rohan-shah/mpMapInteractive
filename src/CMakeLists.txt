@@ -64,7 +64,10 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	endif()
 	message(STATUS "Generating import library for R.dll - done")
 
-	add_definitions(-Dsnprintf=_snprintf)
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
+		#Add a define to account for different name of certain function
+		add_definitions(-Dsnprintf=_snprintf)
+	endif()
 
 	#Put a Makefile.win in the source directory
 	find_program(FULL_MAKE_PROGRAM nmake)
@@ -141,10 +144,10 @@ if(WIN32)
 			#Now for platform stuff
 			get_filename_component(QT_LIB_DIR "${QtGui_location}" DIRECTORY)
 			if(EXISTS ${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll)
-				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll" DESTINATION "${CMAKE_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
+				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindowsd.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
 			endif()
 			if(EXISTS "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll")
-				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll" DESTINATION "${CMAKE_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
+				file(COPY "${QT_LIB_DIR}/../plugins/platforms/qwindows.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/platforms/")
 			endif()
 
 			set_target_properties(mpMapInteractive PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${BUILD_TYPE_UPPER} ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/ PDB_OUTPUT_DIRECTORY_${BUILD_TYPE_UPPER} ${CMAKE_CURRENT_BINARY_DIR}/../${BUILD_TYPE}/inst/libs/x64/)
